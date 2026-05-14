@@ -28,6 +28,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
 
         if (!valid) return null;
+        if (!user.isActive) return null;
 
         return {
           id: user.id,

@@ -10,6 +10,7 @@ datasource db {
 
 enum Role {
   ADMIN
+  EDITOR
   VIEWER
 }
 
@@ -27,34 +28,39 @@ enum MaterialStatus {
   REQUEST_FROM_OTT
 }
 
+enum BrandCategory {
+  GUIDE
+  LOGO
+  PRESENTATION
+  ACTIVE_OFFER
+}
+
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String?
-  passwordHash String
-  role         Role     @default(VIEWER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  entries      Entry[]  @relation("CreatedBy")
+  id             String          @id @default(cuid())
+  email          String          @unique
+  name           String?
+  passwordHash   String
+  role           Role            @default(VIEWER)
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  entries        Entry[]         @relation("CreatedBy")
+  brandMaterials BrandMaterial[] @relation("CreatedBrandMaterials")
 }
 
 model Entry {
   id          String  @id @default(cuid())
 
-  // Basic info
   titleName   String
   contentType ContentType?
   description String?
 
-  // Portfolio / Project links
   portfolio   String
   project     String
 
-  // IDs
   titleId     String?
   kpId        String?
 
-  // Links
   folderLink            String?
   adminPanelLink        String?
   figmaLink             String?
@@ -63,21 +69,18 @@ model Entry {
   digitalCopiesLink     String?
   copyDeckLink          String?
 
-  // Arabic texts
   arabicTitle          String?
   arabicDescription    String?
   arabicShortCopy      String?
   arabicMarketingCopy  String?
   arabicNotes          String?
 
-  // Title metadata
   rightholder    String?
   year           Int?
   restrictionAge String?
   genres         String?
   countries      String?
 
-  // Highlights material
   mainPosterStatus        MaterialStatus?
   characterPostersStatus  MaterialStatus?
   trailerStatus           MaterialStatus?
@@ -95,4 +98,20 @@ model Entry {
   @@index([titleId])
   @@index([kpId])
   @@index([contentType])
+}
+
+model BrandMaterial {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  link        String?
+  category    BrandCategory
+  owner       String?
+  isPublic    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  createdById String
+  createdBy   User          @relation("CreatedBrandMaterials", fields: [createdById], references: [id])
+
+  @@index([category])
 }

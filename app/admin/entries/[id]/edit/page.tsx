@@ -9,7 +9,8 @@ import { ArrowLeft } from "lucide-react";
 
 export default async function EditEntryPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-  if (session?.user.role !== "ADMIN") redirect("/dashboard");
+  const role = session?.user.role;
+  if (role !== "ADMIN" && role !== "EDITOR") redirect("/dashboard");
 
   const { id } = await params;
   const entry = await prisma.entry.findUnique({ where: { id } });
@@ -17,7 +18,7 @@ export default async function EditEntryPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar role={session.user.role} name={session.user.name} />
+      <Navbar role={session!.user.role} name={session!.user.name} />
       <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-3">

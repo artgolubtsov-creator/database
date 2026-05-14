@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/Button";
-import { LogOut, LayoutDashboard, Settings } from "lucide-react";
+import { LogOut, LayoutDashboard, Settings, Palette, Plus } from "lucide-react";
 
 interface NavbarProps {
   role: string;
@@ -16,6 +16,7 @@ export function Navbar({ role, name }: NavbarProps) {
 
   const links = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/brand-materials", label: "Brand", icon: Palette },
     ...(role === "ADMIN" ? [{ href: "/admin", label: "Admin", icon: Settings }] : []),
   ];
 
@@ -38,7 +39,7 @@ export function Navbar({ role, name }: NavbarProps) {
                 href={href}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors",
-                  pathname.startsWith(href)
+                  pathname === href || (href !== "/dashboard" && href !== "/brand-materials" && pathname.startsWith(href))
                     ? "bg-neutral-100 text-neutral-900 font-medium"
                     : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
                 )}
@@ -50,6 +51,14 @@ export function Navbar({ role, name }: NavbarProps) {
           </nav>
         </div>
         <div className="flex items-center gap-3">
+          {(role === "ADMIN" || role === "EDITOR") && (
+            <Link href="/admin/entries/new">
+              <Button size="sm" variant="ghost">
+                <Plus size={15} />
+                <span className="hidden sm:block">New Entry</span>
+              </Button>
+            </Link>
+          )}
           {name && <span className="text-sm text-neutral-500 hidden sm:block">{name}</span>}
           <Button
             variant="ghost"
