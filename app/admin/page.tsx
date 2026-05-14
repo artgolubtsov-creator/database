@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, ExternalLink, Upload } from "lucide-react";
 import { DeleteEntryButton } from "./DeleteEntryButton";
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -38,9 +38,14 @@ export default async function AdminPage() {
               <h2 className="text-xl font-bold text-neutral-900">Entries</h2>
               <p className="text-sm text-neutral-500 mt-0.5">{entries.length} total</p>
             </div>
-            <Link href="/admin/entries/new">
-              <Button size="sm"><Plus size={15} /> New Entry</Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/admin/entries/import">
+                <Button size="sm" variant="ghost"><Upload size={15} /> Import</Button>
+              </Link>
+              <Link href="/admin/entries/new">
+                <Button size="sm"><Plus size={15} /> New Entry</Button>
+              </Link>
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl card-shadow overflow-hidden">
