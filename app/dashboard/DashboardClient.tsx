@@ -3,15 +3,15 @@ import { useRouter, usePathname } from "next/navigation";
 import { useCallback, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EntryCard } from "@/components/EntryCard";
-import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Search, Inbox } from "lucide-react";
 
 interface Entry {
   id: string;
+  titleName: string;
   portfolio: string;
   project: string;
-  task: string;
+  contentType: string | null;
   titleId: string | null;
   kpId: string | null;
   figmaLink: string | null;
@@ -23,14 +23,19 @@ interface Entry {
 
 interface Props {
   entries: Entry[];
-  portfolioOptions: string[];
-  projectOptions: string[];
+  contentTypeOptions: string[];
   initialQ: string;
-  initialPortfolio: string;
-  initialProject: string;
+  initialContentType: string;
 }
 
-export function DashboardClient({ entries, portfolioOptions, projectOptions, initialQ, initialPortfolio, initialProject }: Props) {
+const CONTENT_TYPE_OPTIONS = [
+  { value: "EXCLUSIVE", label: "Exclusive" },
+  { value: "MOVIES", label: "Movies" },
+  { value: "SERIES", label: "Series" },
+  { value: "ORIGINAL", label: "Original" },
+];
+
+export function DashboardClient({ entries, initialQ, initialContentType }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
@@ -54,23 +59,16 @@ export function DashboardClient({ entries, portfolioOptions, projectOptions, ini
           <input
             defaultValue={initialQ}
             onChange={(e) => updateParams("q", e.target.value)}
-            placeholder="Search entries..."
+            placeholder="Search by title, ID, KP ID..."
             className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-neutral-200 bg-white focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100 outline-none transition-all"
           />
         </div>
         <Select
-          options={portfolioOptions.map((p) => ({ value: p, label: p }))}
-          placeholder="All portfolios"
-          defaultValue={initialPortfolio}
-          onChange={(e) => updateParams("portfolio", e.target.value)}
-          className="sm:w-48"
-        />
-        <Select
-          options={projectOptions.map((p) => ({ value: p, label: p }))}
-          placeholder="All projects"
-          defaultValue={initialProject}
-          onChange={(e) => updateParams("project", e.target.value)}
-          className="sm:w-48"
+          options={CONTENT_TYPE_OPTIONS}
+          placeholder="All types"
+          defaultValue={initialContentType}
+          onChange={(e) => updateParams("type", e.target.value)}
+          className="sm:w-44"
         />
       </div>
 

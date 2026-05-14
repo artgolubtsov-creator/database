@@ -39,7 +39,7 @@ export default async function AdminPage() {
               <thead>
                 <tr className="border-b border-neutral-100 text-left">
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide">Portfolio / Project</th>
-                  <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden md:table-cell">Task</th>
+                  <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden md:table-cell">Title Name</th>
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden lg:table-cell">IDs</th>
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden lg:table-cell">Created</th>
                   <th className="px-5 py-3.5 w-24"></th>
@@ -54,7 +54,7 @@ export default async function AdminPage() {
                         <span className="text-neutral-600 text-xs">{entry.project}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-neutral-700 max-w-xs truncate hidden md:table-cell">{entry.task}</td>
+                    <td className="px-5 py-3.5 text-neutral-700 max-w-xs truncate hidden md:table-cell">{entry.titleName}</td>
                     <td className="px-5 py-3.5 hidden lg:table-cell">
                       <div className="flex flex-col gap-0.5 text-xs font-mono text-neutral-500">
                         {entry.titleId && <span>{entry.titleId}</span>}

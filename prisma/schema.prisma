@@ -13,6 +13,20 @@ enum Role {
   VIEWER
 }
 
+enum ContentType {
+  EXCLUSIVE
+  MOVIES
+  SERIES
+  ORIGINAL
+}
+
+enum MaterialStatus {
+  ADDED
+  NOT_RECEIVED_YET
+  NOT_REQUIRED
+  REQUEST_FROM_OTT
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -25,24 +39,60 @@ model User {
 }
 
 model Entry {
-  id             String   @id @default(cuid())
-  portfolio      String
-  project        String
-  task           String
-  folderLink     String?
-  adminPanelLink String?
-  titleId        String?
-  kpId           String?
-  figmaLink      String?
-  sourceLink     String?
-  description    String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  createdById    String
-  createdBy      User     @relation("CreatedBy", fields: [createdById], references: [id])
+  id          String  @id @default(cuid())
+
+  // Basic info
+  titleName   String
+  contentType ContentType?
+  description String?
+
+  // Portfolio / Project links
+  portfolio   String
+  project     String
+
+  // IDs
+  titleId     String?
+  kpId        String?
+
+  // Links
+  folderLink            String?
+  adminPanelLink        String?
+  figmaLink             String?
+  sourceLink            String?
+  performanceCopiesLink String?
+  digitalCopiesLink     String?
+  copyDeckLink          String?
+
+  // Arabic texts
+  arabicTitle          String?
+  arabicDescription    String?
+  arabicShortCopy      String?
+  arabicMarketingCopy  String?
+  arabicNotes          String?
+
+  // Title metadata
+  rightholder    String?
+  year           Int?
+  restrictionAge String?
+  genres         String?
+  countries      String?
+
+  // Highlights material
+  mainPosterStatus        MaterialStatus?
+  characterPostersStatus  MaterialStatus?
+  trailerStatus           MaterialStatus?
+  teaserStatus            MaterialStatus?
+  episodesStatus          MaterialStatus?
+  highlightsNotes         String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+  createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
 
   @@index([portfolio])
   @@index([project])
   @@index([titleId])
   @@index([kpId])
+  @@index([contentType])
 }

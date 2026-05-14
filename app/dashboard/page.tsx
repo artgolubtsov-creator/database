@@ -1,27 +1,25 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Navbar } from "@/components/Navbar";
-import { EntryCard } from "@/components/EntryCard";
 import { DashboardClient } from "./DashboardClient";
 
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; portfolio?: string; project?: string }>;
+  searchParams: Promise<{ q?: string; type?: string }>;
 }) {
   const session = await auth();
   const params = await searchParams;
-  const { q, portfolio, project } = params;
+  const { q, type } = params;
 
   const where = {
-    ...(portfolio ? { portfolio } : {}),
-    ...(project ? { project } : {}),
+    ...(type ? { contentType: type as never } : {}),
     ...(q
       ? {
           OR: [
+            { titleName: { contains: q, mode: "insensitive" as const } },
             { portfolio: { contains: q, mode: "insensitive" as const } },
             { project: { contains: q, mode: "insensitive" as const } },
-            { task: { contains: q, mode: "insensitive" as const } },
             { titleId: { contains: q, mode: "insensitive" as const } },
             { kpId: { contains: q, mode: "insensitive" as const } },
             { description: { contains: q, mode: "insensitive" as const } },
@@ -30,11 +28,7 @@ export default async function DashboardPage({
       : {}),
   };
 
-  const [entries, portfolios, projects] = await Promise.all([
-    prisma.entry.findMany({ where, orderBy: { createdAt: "desc" } }),
-    prisma.entry.findMany({ select: { portfolio: true }, distinct: ["portfolio"] }),
-    prisma.entry.findMany({ select: { project: true }, distinct: ["project"] }),
-  ]);
+  const entries = await prisma.entry.findMany({ where, orderBy: { createdAt: "desc" } });
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -42,11 +36,9 @@ export default async function DashboardPage({
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
         <DashboardClient
           entries={entries}
-          portfolioOptions={portfolios.map((p) => p.portfolio)}
-          projectOptions={projects.map((p) => p.project)}
+          contentTypeOptions={["EXCLUSIVE", "MOVIES", "SERIES", "ORIGINAL"]}
           initialQ={q ?? ""}
-          initialPortfolio={portfolio ?? ""}
-          initialProject={project ?? ""}
+          initialContentType={type ?? ""}
         />
       </main>
     </div>

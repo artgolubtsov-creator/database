@@ -5,11 +5,19 @@ import { Badge } from "./ui/Badge";
 import { ExternalLink, Frame, Folder, Monitor } from "lucide-react";
 import { isValidUrl } from "@/lib/utils";
 
+const CONTENT_TYPE_LABELS: Record<string, string> = {
+  EXCLUSIVE: "Exclusive",
+  MOVIES: "Movies",
+  SERIES: "Series",
+  ORIGINAL: "Original",
+};
+
 interface Entry {
   id: string;
+  titleName: string;
   portfolio: string;
   project: string;
-  task: string;
+  contentType: string | null;
   titleId: string | null;
   kpId: string | null;
   figmaLink: string | null;
@@ -30,11 +38,13 @@ export function EntryCard({ entry }: { entry: Entry }) {
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-col gap-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="blue">{entry.portfolio}</Badge>
+              {entry.contentType && (
+                <Badge variant="blue">{CONTENT_TYPE_LABELS[entry.contentType] ?? entry.contentType}</Badge>
+              )}
               <Badge>{entry.project}</Badge>
             </div>
             <h3 className="text-sm font-semibold text-neutral-900 leading-snug mt-1 line-clamp-2">
-              {entry.task}
+              {entry.titleName}
             </h3>
           </div>
         </div>

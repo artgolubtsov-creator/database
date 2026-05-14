@@ -18,7 +18,7 @@ export default async function EditEntryPage({ params }: { params: Promise<{ id: 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar role={session.user.role} name={session.user.name} />
-      <main className="flex-1 max-w-2xl mx-auto w-full px-6 py-8">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-3">
             <Link href="/admin">
@@ -27,23 +27,43 @@ export default async function EditEntryPage({ params }: { params: Promise<{ id: 
           </div>
           <div>
             <h1 className="text-xl font-bold text-neutral-900">Edit Entry</h1>
-            <p className="text-sm text-neutral-500 mt-0.5 truncate">{entry.task}</p>
+            <p className="text-sm text-neutral-500 mt-0.5 truncate">{entry.titleName}</p>
           </div>
           <div className="bg-white rounded-2xl card-shadow p-7">
             <EntryForm
               mode="edit"
               entryId={entry.id}
               initialValues={{
+                titleName: entry.titleName,
+                contentType: (entry.contentType ?? "") as never,
                 portfolio: entry.portfolio,
                 project: entry.project,
-                task: entry.task,
-                folderLink: entry.folderLink ?? "",
-                adminPanelLink: entry.adminPanelLink ?? "",
                 titleId: entry.titleId ?? "",
                 kpId: entry.kpId ?? "",
+                description: entry.description ?? "",
+                folderLink: entry.folderLink ?? "",
+                adminPanelLink: entry.adminPanelLink ?? "",
                 figmaLink: entry.figmaLink ?? "",
                 sourceLink: entry.sourceLink ?? "",
-                description: entry.description ?? "",
+                performanceCopiesLink: entry.performanceCopiesLink ?? "",
+                digitalCopiesLink: entry.digitalCopiesLink ?? "",
+                copyDeckLink: entry.copyDeckLink ?? "",
+                arabicTitle: entry.arabicTitle ?? "",
+                arabicDescription: entry.arabicDescription ?? "",
+                arabicShortCopy: entry.arabicShortCopy ?? "",
+                arabicMarketingCopy: entry.arabicMarketingCopy ?? "",
+                arabicNotes: entry.arabicNotes ?? "",
+                rightholder: entry.rightholder ?? "",
+                year: entry.year?.toString() ?? "",
+                restrictionAge: entry.restrictionAge ?? "",
+                genres: entry.genres ?? "",
+                countries: entry.countries ?? "",
+                mainPosterStatus: (entry.mainPosterStatus ?? "") as never,
+                characterPostersStatus: (entry.characterPostersStatus ?? "") as never,
+                trailerStatus: (entry.trailerStatus ?? "") as never,
+                teaserStatus: (entry.teaserStatus ?? "") as never,
+                episodesStatus: (entry.episodesStatus ?? "") as never,
+                highlightsNotes: entry.highlightsNotes ?? "",
               }}
             />
           </div>
