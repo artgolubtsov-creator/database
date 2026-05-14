@@ -3,11 +3,29 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
+const CONTENT_TYPE_MAP: Record<string, string> = {
+  "ott-movie": "MOVIES",
+  "movie": "MOVIES",
+  "tv-series": "SERIES",
+  "series": "SERIES",
+  "exclusive": "EXCLUSIVE",
+  "original": "ORIGINAL",
+};
+
+function normalizeContentType(v: string | undefined): string | null {
+  if (!v) return null;
+  const mapped = CONTENT_TYPE_MAP[v.toLowerCase().trim()];
+  if (mapped) return mapped;
+  const upper = v.toUpperCase().trim();
+  if (["EXCLUSIVE", "MOVIES", "SERIES", "ORIGINAL"].includes(upper)) return upper;
+  return null;
+}
+
 const rowSchema = z.object({
   titleName: z.string().min(1),
-  portfolio: z.string().min(1),
-  project: z.string().min(1),
-  contentType: z.enum(["EXCLUSIVE", "MOVIES", "SERIES", "ORIGINAL"]).optional().nullable(),
+  portfolio: z.string().optional().transform(v => v || "-"),
+  project: z.string().optional().transform(v => v || "-"),
+  contentType: z.string().optional().nullable(),
   titleId: z.string().optional().transform(v => v || null),
   kpId: z.string().optional().transform(v => v || null),
   description: z.string().optional().transform(v => v || null),
@@ -48,15 +66,25 @@ export async function POST(req: NextRequest) {
   };
 
   for (let i = 0; i < rows.length; i++) {
-    const parsed = rowSchema.safeParse(rows[i]);
+    const raw = rows[i];
+    // Normalize content type before validation
+    const normalized = { ...raw, contentType: normalizeContentType(raw.contentType) };
+
+    const parsed = rowSchema.safeParse(normalized);
     if (!parsed.success) {
       const msg = Object.values(parsed.error.flatten().fieldErrors).flat().join("; ");
       results.errors.push({ row: i + 2, message: msg || "Validation error" });
       continue;
     }
+
+    const { contentType, ...rest } = parsed.data;
     try {
       await prisma.entry.create({
-        data: { ...parsed.data, createdById: session.user.id },
+        data: {
+          ...rest,
+          contentType: contentType as "EXCLUSIVE" | "MOVIES" | "SERIES" | "ORIGINAL" | null,
+          createdById: session.user.id,
+        },
       });
       results.created++;
     } catch {

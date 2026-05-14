@@ -5,13 +5,42 @@ import { Upload, FileText, CheckCircle, AlertCircle, X } from "lucide-react";
 
 type Row = Record<string, string>;
 
-const REQUIRED = ["titleName", "portfolio", "project"];
+// portfolio and project not required — they default to "-" on the server
+const REQUIRED = ["titleName"];
 
 // Header aliases → canonical field name
 const HEADER_MAP: Record<string, string> = {
+  // English names
   "title name": "titleName",
   "titlename": "titleName",
   "title": "titleName",
+  // Snake-case from DB exports
+  "title_en": "titleName",
+  "title_ar": "arabicTitle",
+  "entity_id": "titleId",
+  "uuid": "kpId",
+  "content_type": "contentType",
+  "ott_description_en": "description",
+  "ott_description_ar": "arabicDescription",
+  "restriction_age": "restrictionAge",
+  "ott_status": "_skip",
+  "has_input_stream": "_skip",
+  "active_license": "_skip",
+  "startdate": "_skip",
+  "currentdate": "_skip",
+  "enddate": "_skip",
+  "ott_thumbnail_en": "_skip",
+  "ott_thumbnail_ar": "_skip",
+  "ott_vertical_poster_en": "_skip",
+  "ott_vertical_poster_ar": "_skip",
+  "logo_en": "_skip",
+  "logo_ar": "_skip",
+  "mobile_thumbnail_en": "_skip",
+  "mobile_thumbnail_ar": "_skip",
+  "ott_horizontal_poster_en": "_skip",
+  "ott_horizontal_poster_ar": "_skip",
+  "trailer": "_skip",
+  // Standard names
   "portfolio": "portfolio",
   "project": "project",
   "content type": "contentType",
@@ -78,20 +107,23 @@ function parseLine(line: string): string[] {
 function parseCSV(text: string): Row[] {
   const lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim().split("\n");
   if (lines.length < 2) return [];
-  const headers = parseLine(lines[0]).map(normalizeHeader);
+  const rawHeaders = parseLine(lines[0]);
+  const headers = rawHeaders.map(normalizeHeader);
+
   return lines
     .slice(1)
     .filter((l) => l.trim())
     .map((line) => {
       const values = parseLine(line);
-      return headers.reduce<Row>((obj, h, i) => {
-        obj[h] = (values[i] ?? "").trim();
-        return obj;
-      }, {});
+      const row: Row = {};
+      headers.forEach((h, i) => {
+        if (h !== "_skip") row[h] = (values[i] ?? "").trim();
+      });
+      return row;
     });
 }
 
-const PREVIEW_COLS = ["titleName", "portfolio", "project", "contentType", "year", "genres", "countries"];
+const PREVIEW_COLS = ["titleName", "contentType", "year", "genres", "countries", "arabicTitle"];
 
 type ImportResult = { created: number; errors: { row: number; message: string }[] };
 
@@ -155,7 +187,6 @@ export function ImportClient() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Drop zone */}
       {!fileName && (
         <div
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -171,13 +202,12 @@ export function ImportClient() {
           </div>
           <div className="text-center">
             <p className="text-sm font-medium text-neutral-700">Drop CSV file here or click to browse</p>
-            <p className="text-xs text-neutral-400 mt-1">UTF-8 CSV with header row. Required columns: titleName, portfolio, project</p>
+            <p className="text-xs text-neutral-400 mt-1">UTF-8 CSV with header row. Required: titleName (or title_en)</p>
           </div>
           <input ref={inputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={onInputChange} />
         </div>
       )}
 
-      {/* File loaded */}
       {fileName && !result && (
         <>
           <div className="flex items-center gap-3 bg-neutral-50 rounded-xl px-4 py-3">
@@ -194,11 +224,10 @@ export function ImportClient() {
               {missingRequired > 0 && (
                 <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
                   <AlertCircle size={15} className="shrink-0" />
-                  {missingRequired} row{missingRequired > 1 ? "s" : ""} missing required fields (titleName, portfolio, project) — they will be skipped
+                  {missingRequired} row{missingRequired > 1 ? "s" : ""} missing titleName — they will be skipped
                 </div>
               )}
 
-              {/* Preview */}
               <div className="flex flex-col gap-2">
                 <p className="text-xs font-medium text-neutral-400 uppercase tracking-wide">Preview (first 5 rows)</p>
                 <div className="bg-white rounded-2xl card-shadow overflow-x-auto">
@@ -214,7 +243,7 @@ export function ImportClient() {
                       {rows.slice(0, 5).map((row, i) => (
                         <tr key={i} className="border-b border-neutral-50">
                           {PREVIEW_COLS.map((col) => (
-                            <td key={col} className={`px-4 py-3 max-w-[180px] truncate ${
+                            <td key={col} className={`px-4 py-3 max-w-[200px] truncate ${
                               REQUIRED.includes(col) && !row[col] ? "text-red-400" : "text-neutral-700"
                             }`}>
                               {row[col] || <span className="text-neutral-300">—</span>}
@@ -242,7 +271,6 @@ export function ImportClient() {
         </>
       )}
 
-      {/* Result */}
       {result && (
         <div className="flex flex-col gap-4">
           <div className={`flex items-center gap-3 rounded-xl px-5 py-4 ${
@@ -259,7 +287,7 @@ export function ImportClient() {
             </div>
           </div>
 
-          {result.errors.length > 0 && (
+          {result.errors.length > 0 && result.errors.length <= 20 && (
             <div className="flex flex-col gap-2">
               <p className="text-xs font-medium text-neutral-400 uppercase tracking-wide">Skipped rows</p>
               <div className="bg-white rounded-2xl card-shadow overflow-hidden">
@@ -274,6 +302,12 @@ export function ImportClient() {
                 ))}
               </div>
             </div>
+          )}
+
+          {result.errors.length > 20 && (
+            <p className="text-sm text-neutral-500 bg-neutral-50 rounded-xl px-4 py-3">
+              {result.errors.length} rows skipped. First error: Row {result.errors[0].row} — {result.errors[0].message}
+            </p>
           )}
 
           <div className="flex justify-end">

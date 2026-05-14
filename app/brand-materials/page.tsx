@@ -12,12 +12,16 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 const CATEGORY_ORDER = ["ACTIVE_OFFER", "GUIDE", "PRESENTATION", "LOGO"];
 
+function formatUpdatedAt(date: Date): string {
+  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 export default async function BrandMaterialsPage() {
   const session = await auth();
 
   const materials = await prisma.brandMaterial.findMany({
     where: { isPublic: true },
-    orderBy: [{ category: "asc" }, { createdAt: "desc" }],
+    orderBy: [{ category: "asc" }, { updatedAt: "desc" }],
   });
 
   const grouped = CATEGORY_ORDER.reduce<Record<string, typeof materials>>((acc, cat) => {
@@ -25,38 +29,54 @@ export default async function BrandMaterialsPage() {
     return acc;
   }, {});
 
-  const activeOffer = grouped["ACTIVE_OFFER"]?.[0];
+  const activeOffers = grouped["ACTIVE_OFFER"] ?? [];
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar role={session!.user.role} name={session!.user.name} />
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-8 flex flex-col gap-10">
 
-        {activeOffer && (
-          <section className="bg-neutral-900 rounded-2xl p-8 text-white flex flex-col gap-4">
-            <div className="text-xs font-semibold uppercase tracking-widest text-neutral-400">Current Active Offer</div>
-            <h2 className="text-2xl font-bold">{activeOffer.title}</h2>
-            {activeOffer.description && (
-              <p className="text-neutral-300 text-sm leading-relaxed max-w-2xl">{activeOffer.description}</p>
-            )}
-            <div className="flex items-center gap-4 mt-2">
-              {activeOffer.owner && (
-                <span className="text-sm text-neutral-400">Owner: <span className="text-neutral-200">{activeOffer.owner}</span></span>
-              )}
-              {activeOffer.link && (
-                <a
-                  href={activeOffer.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-neutral-700 hover:bg-neutral-600 px-4 py-2 rounded-xl transition-colors"
-                >
-                  <ExternalLink size={14} /> Open
-                </a>
-              )}
+        {/* Active Offer — table format */}
+        {activeOffers.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold text-neutral-900">Active Offer</h2>
+            <div className="bg-white rounded-2xl card-shadow overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-neutral-100 text-left">
+                    <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide">Title</th>
+                    <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden md:table-cell">Territory</th>
+                    <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden lg:table-cell">Description</th>
+                    <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide">Updated</th>
+                    <th className="px-5 py-3.5 w-16"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeOffers.map((m) => (
+                    <tr key={m.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
+                      <td className="px-5 py-3.5 font-medium text-neutral-900">{m.title}</td>
+                      <td className="px-5 py-3.5 text-neutral-500 hidden md:table-cell">{m.owner ?? "—"}</td>
+                      <td className="px-5 py-3.5 text-neutral-500 max-w-xs truncate hidden lg:table-cell">
+                        {m.description ?? "—"}
+                      </td>
+                      <td className="px-5 py-3.5 text-xs text-neutral-400 whitespace-nowrap">{formatUpdatedAt(m.updatedAt)}</td>
+                      <td className="px-5 py-3.5">
+                        {m.link && (
+                          <a href={m.link} target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-blue-500 hover:text-blue-700 transition-colors">
+                            <ExternalLink size={13} />
+                          </a>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </section>
         )}
 
+        {/* Other categories — card grid */}
         {CATEGORY_ORDER.filter((cat) => cat !== "ACTIVE_OFFER" && grouped[cat]?.length > 0).map((cat) => (
           <section key={cat} className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold text-neutral-900">{CATEGORY_LABEL[cat]}</h2>
@@ -65,7 +85,10 @@ export default async function BrandMaterialsPage() {
                 <div key={m.id} className="bg-white rounded-2xl card-shadow p-5 flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
                     <span className="font-semibold text-neutral-900 text-sm">{m.title}</span>
-                    {m.owner && <span className="text-xs text-neutral-400">{m.owner}</span>}
+                    <div className="flex items-center gap-2">
+                      {m.owner && <span className="text-xs text-neutral-400">{m.owner}</span>}
+                      <span className="text-xs text-neutral-300">Updated {formatUpdatedAt(m.updatedAt)}</span>
+                    </div>
                   </div>
                   {m.description && (
                     <p className="text-sm text-neutral-500 leading-relaxed">{m.description}</p>
