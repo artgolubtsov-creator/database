@@ -16,7 +16,14 @@ interface Entry {
   year: number | null;
   countries: string | null;
   genres: string | null;
+  portfolio: string;
+  figmaLink: string | null;
   sourceLink: string | null;
+  folderLink: string | null;
+  adminPanelLink: string | null;
+  performanceCopiesLink: string | null;
+  digitalCopiesLink: string | null;
+  copyDeckLink: string | null;
 }
 
 interface Props {
@@ -46,6 +53,36 @@ const TYPE_BADGE: Record<string, string> = {
   ORIGINAL: "bg-amber-100 text-amber-700",
 };
 
+const LINK_INDICATORS: { label: string; key: keyof Entry }[] = [
+  { label: "Figma",     key: "figmaLink" },
+  { label: "Source",    key: "sourceLink" },
+  { label: "Folder",    key: "folderLink" },
+  { label: "Admin",     key: "adminPanelLink" },
+  { label: "Perf",      key: "performanceCopiesLink" },
+  { label: "Digital",   key: "digitalCopiesLink" },
+  { label: "Deck",      key: "copyDeckLink" },
+  { label: "Portfolio", key: "portfolio" },
+];
+
+function StatusCell({ entry }: { entry: Entry }) {
+  return (
+    <div className="grid grid-cols-4 gap-x-3 gap-y-2 min-w-[180px]">
+      {LINK_INDICATORS.map(({ label, key }) => {
+        const val = entry[key];
+        const has = key === "portfolio" ? (!!val && val !== "-") : !!val;
+        return (
+          <div key={label} className="flex flex-col items-center gap-0.5">
+            <span className="text-[10px] text-neutral-400 leading-none">{label}</span>
+            <span className={`text-[11px] font-semibold leading-none ${has ? "text-emerald-500" : "text-red-400"}`}>
+              {has ? "Yes" : "No"}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function DashboardClient({
   entries, total, page, pageSize,
   initialQ, initialContentType, initialCountry, initialGenre, initialDateFrom, initialDateTo,
@@ -62,7 +99,6 @@ export function DashboardClient({
     for (const [key, value] of Object.entries(updates)) {
       if (value) params.set(key, value); else params.delete(key);
     }
-    // Reset to page 1 on filter change (unless explicitly setting page)
     if (!("page" in updates)) params.delete("page");
     startTransition(() => router.replace(`${pathname}?${params.toString()}`));
   }, [router, pathname]);
@@ -151,7 +187,7 @@ export function DashboardClient({
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden lg:table-cell">Entity ID</th>
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden lg:table-cell">Year</th>
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden xl:table-cell">Countries</th>
-                  <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide text-center">Source</th>
+                  <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide">Materials</th>
                 </tr>
               </thead>
               <tbody>
@@ -179,10 +215,8 @@ export function DashboardClient({
                     </td>
                     <td className="px-5 py-3 text-neutral-500 hidden lg:table-cell">{entry.year ?? "—"}</td>
                     <td className="px-5 py-3 text-neutral-500 text-xs max-w-[140px] truncate hidden xl:table-cell">{entry.countries ?? "—"}</td>
-                    <td className="px-5 py-3 text-center">
-                      {entry.sourceLink
-                        ? <span className="text-xs font-medium text-emerald-600">Yes</span>
-                        : <span className="text-xs font-medium text-red-400">No</span>}
+                    <td className="px-5 py-4">
+                      <StatusCell entry={entry} />
                     </td>
                   </tr>
                 ))}
