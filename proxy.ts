@@ -9,6 +9,9 @@ export default auth((req) => {
   const isEditor = role === "EDITOR";
   const path = nextUrl.pathname;
 
+  // Public share links — no auth required
+  if (path.startsWith("/share/")) return NextResponse.next();
+
   // Unauthenticated → login
   if (!isLoggedIn && !path.startsWith("/login") && !path.startsWith("/api/auth")) {
     return NextResponse.redirect(new URL("/login", nextUrl));

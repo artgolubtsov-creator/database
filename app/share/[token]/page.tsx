@@ -1,14 +1,8 @@
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { Navbar } from "@/components/Navbar";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { formatDate, isValidUrl } from "@/lib/utils";
-import Link from "next/link";
-import { ArrowLeft, ExternalLink, Frame, Folder, Monitor, Pencil } from "lucide-react";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { CopyLinkButton } from "@/components/CopyLinkButton";
+import { ExternalLink, Frame, Folder, Monitor } from "lucide-react";
+import { isValidUrl } from "@/lib/utils";
 
 const CONTENT_TYPE_LABELS: Record<string, string> = {
   EXCLUSIVE: "Exclusive",
@@ -72,10 +66,9 @@ const HIGHLIGHT_ROWS = [
   { field: "episodesStatus" as const,         label: "Episodes" },
 ];
 
-export default async function EntryPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  const { id } = await params;
-  const entry = await prisma.entry.findUnique({ where: { id } });
+export default async function SharePage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+  const entry = await prisma.entry.findUnique({ where: { shareToken: token } });
   if (!entry) notFound();
 
   const hasArabic = entry.arabicTitle || entry.arabicDescription || entry.arabicShortCopy || entry.arabicMarketingCopy || entry.arabicNotes;
@@ -85,26 +78,18 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
                     entry.performanceCopiesLink, entry.digitalCopiesLink, entry.copyDeckLink].some(isValidUrl);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar role={session!.user.role} name={session!.user.name} />
+    <div className="min-h-screen bg-neutral-50 flex flex-col">
+      <header className="bg-white border-b border-neutral-100 px-6 py-4">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <span className="text-sm font-semibold text-neutral-500 tracking-wide">Yango Play · Content Hub</span>
+          <span className="text-xs text-neutral-300">Shared link</span>
+        </div>
+      </header>
+
       <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
         <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <Breadcrumbs items={[
-              { label: "Dashboard", href: "/dashboard" },
-              { label: entry.titleName },
-            ]} />
-            <div className="flex items-center gap-2">
-              <CopyLinkButton shareToken={entry.shareToken} />
-              {(session!.user.role === "ADMIN" || session!.user.role === "EDITOR") && (
-                <Link href={`/admin/entries/${entry.id}/edit`}>
-                  <Button variant="secondary" size="sm"><Pencil size={13} /> Edit</Button>
-                </Link>
-              )}
-            </div>
-          </div>
 
-          {/* ── Header ── */}
+          {/* Header */}
           <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-6">
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap gap-2">
@@ -123,17 +108,10 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
 
-            {entry.description && (
-              <TextRow label="Description" value={entry.description} />
-            )}
-
-            <div className="flex gap-6 text-xs text-neutral-400 pt-2 border-t border-neutral-100">
-              <span>Created {formatDate(entry.createdAt)}</span>
-              <span>Updated {formatDate(entry.updatedAt)}</span>
-            </div>
+            {entry.description && <TextRow label="Description" value={entry.description} />}
           </div>
 
-          {/* ── Links ── */}
+          {/* Links */}
           {hasLinks && (
             <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-4">
               <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide">Links</h2>
@@ -149,7 +127,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
             </div>
           )}
 
-          {/* ── Metadata ── */}
+          {/* Metadata */}
           {hasMeta && (
             <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-4">
               <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide">Title Metadata</h2>
@@ -163,7 +141,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
             </div>
           )}
 
-          {/* ── Arabic Texts ── */}
+          {/* Arabic Texts */}
           {hasArabic && (
             <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-4" dir="rtl">
               <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide" dir="ltr">Arabic Texts</h2>
@@ -175,7 +153,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
             </div>
           )}
 
-          {/* ── Highlights Material ── */}
+          {/* Highlights */}
           {hasHighlights && (
             <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-4">
               <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide">Highlights Material</h2>
@@ -191,17 +169,13 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
                     {HIGHLIGHT_ROWS.map(({ field, label }, i) => (
                       <tr key={field} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50/50"}>
                         <td className="px-4 py-2.5 font-medium text-neutral-700">{label}</td>
-                        <td className="px-4 py-2.5">
-                          <MaterialStatusBadge status={entry[field]} />
-                        </td>
+                        <td className="px-4 py-2.5"><MaterialStatusBadge status={entry[field]} /></td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              {entry.highlightsNotes && (
-                <TextRow label="Notes" value={entry.highlightsNotes} />
-              )}
+              {entry.highlightsNotes && <TextRow label="Notes" value={entry.highlightsNotes} />}
             </div>
           )}
         </div>
