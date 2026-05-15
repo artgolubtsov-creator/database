@@ -56,6 +56,7 @@ export default async function DashboardPage({
         year: true,
         countries: true,
         genres: true,
+        sourceLink: true,
       },
     }),
     prisma.entry.count({ where }),

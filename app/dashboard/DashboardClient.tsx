@@ -16,6 +16,7 @@ interface Entry {
   year: number | null;
   countries: string | null;
   genres: string | null;
+  sourceLink: string | null;
 }
 
 interface Props {
@@ -150,6 +151,7 @@ export function DashboardClient({
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden lg:table-cell">Entity ID</th>
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden lg:table-cell">Year</th>
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden xl:table-cell">Countries</th>
+                  <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide text-center">Source</th>
                 </tr>
               </thead>
               <tbody>
@@ -177,6 +179,11 @@ export function DashboardClient({
                     </td>
                     <td className="px-5 py-3 text-neutral-500 hidden lg:table-cell">{entry.year ?? "—"}</td>
                     <td className="px-5 py-3 text-neutral-500 text-xs max-w-[140px] truncate hidden xl:table-cell">{entry.countries ?? "—"}</td>
+                    <td className="px-5 py-3 text-center">
+                      {entry.sourceLink
+                        ? <span className="text-xs font-medium text-emerald-600">Yes</span>
+                        : <span className="text-xs font-medium text-red-400">No</span>}
+                    </td>
                   </tr>
                 ))}
               </tbody>
