@@ -43,7 +43,7 @@ export default async function DashboardPage({
   const [entries, total] = await Promise.all([
     prisma.entry.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ year: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
       select: {
