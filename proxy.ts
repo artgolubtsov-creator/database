@@ -38,6 +38,14 @@ export default auth((req) => {
   if (path.startsWith("/admin/entries") && !isAdmin && !isEditor) {
     return NextResponse.redirect(new URL("/dashboard", nextUrl));
   }
+
+  // Brand materials management outside admin (ADMIN | EDITOR)
+  const isBrandMgmt =
+    path === "/brand-materials/new" ||
+    /^\/brand-materials\/[^/]+\/edit/.test(path);
+  if (isBrandMgmt && !isAdmin && !isEditor) {
+    return NextResponse.redirect(new URL("/dashboard", nextUrl));
+  }
 });
 
 export const config = {

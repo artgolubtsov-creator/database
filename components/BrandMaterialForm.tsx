@@ -31,9 +31,10 @@ interface Props {
   mode: "create" | "edit";
   materialId?: string;
   initialValues?: Partial<FormValues>;
+  redirectTo?: string;
 }
 
-export function BrandMaterialForm({ mode, materialId, initialValues }: Props) {
+export function BrandMaterialForm({ mode, materialId, initialValues, redirectTo }: Props) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -69,7 +70,7 @@ export function BrandMaterialForm({ mode, materialId, initialValues }: Props) {
       return;
     }
 
-    router.push("/admin/brand-materials");
+    router.push(redirectTo ?? "/admin/brand-materials");
     router.refresh();
   };
 

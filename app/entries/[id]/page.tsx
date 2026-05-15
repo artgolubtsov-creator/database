@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { formatDate, isValidUrl } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, Frame, Folder, Monitor, Pencil } from "lucide-react";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const CONTENT_TYPE_LABELS: Record<string, string> = {
   EXCLUSIVE: "Exclusive",
@@ -88,10 +89,11 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
       <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm"><ArrowLeft size={15} /> Back</Button>
-            </Link>
-            {session!.user.role === "ADMIN" && (
+            <Breadcrumbs items={[
+              { label: "Dashboard", href: "/dashboard" },
+              { label: entry.titleName },
+            ]} />
+            {(session!.user.role === "ADMIN" || session!.user.role === "EDITOR") && (
               <Link href={`/admin/entries/${entry.id}/edit`}>
                 <Button variant="secondary" size="sm"><Pencil size={13} /> Edit</Button>
               </Link>
