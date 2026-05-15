@@ -73,111 +73,108 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
 
   const hasArabic = entry.arabicTitle || entry.arabicDescription || entry.arabicShortCopy || entry.arabicMarketingCopy || entry.arabicNotes;
   const hasMeta = entry.rightholder || entry.year || entry.restrictionAge || entry.genres || entry.countries;
-  const hasHighlights = HIGHLIGHT_ROWS.some(r => entry[r.field]) || entry.highlightsNotes;
   const hasLinks = [entry.figmaLink, entry.sourceLink, entry.folderLink, entry.adminPanelLink,
                     entry.performanceCopiesLink, entry.digitalCopiesLink, entry.copyDeckLink].some(isValidUrl);
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col">
       <header className="bg-white border-b border-neutral-100 px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
           <span className="text-sm font-semibold text-neutral-500 tracking-wide">Yango Play · Content Hub</span>
           <span className="text-xs text-neutral-300">Shared link</span>
         </div>
       </header>
 
-      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
-        <div className="flex flex-col gap-6">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_272px] gap-6 items-start">
 
-          {/* Header */}
-          <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-6">
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-wrap gap-2">
-                {entry.contentType && (
-                  <Badge variant="blue">{CONTENT_TYPE_LABELS[entry.contentType] ?? entry.contentType}</Badge>
-                )}
-                <Badge>{entry.project}</Badge>
+          {/* ── Left column ── */}
+          <div className="flex flex-col gap-6">
+
+            {/* Header */}
+            <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-6">
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-wrap gap-2">
+                  {entry.contentType && (
+                    <Badge variant="blue">{CONTENT_TYPE_LABELS[entry.contentType] ?? entry.contentType}</Badge>
+                  )}
+                  <Badge>{entry.project}</Badge>
+                </div>
+                <h1 className="text-xl font-bold text-neutral-900 leading-snug">{entry.titleName}</h1>
               </div>
-              <h1 className="text-xl font-bold text-neutral-900 leading-snug">{entry.titleName}</h1>
+
+              {(entry.titleId || entry.kpId) && (
+                <div className="grid grid-cols-2 gap-4 p-4 bg-neutral-50 rounded-xl">
+                  <FieldRow label="Title ID" value={entry.titleId} />
+                  <FieldRow label="KP ID" value={entry.kpId} />
+                </div>
+              )}
+
+              {entry.description && <TextRow label="Description" value={entry.description} />}
             </div>
 
-            {(entry.titleId || entry.kpId) && (
-              <div className="grid grid-cols-2 gap-4 p-4 bg-neutral-50 rounded-xl">
-                <FieldRow label="Title ID" value={entry.titleId} />
-                <FieldRow label="KP ID" value={entry.kpId} />
+            {/* Links */}
+            {hasLinks && (
+              <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-4">
+                <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide">Links</h2>
+                <div className="flex flex-col gap-2.5">
+                  <LinkRow label="Figma" href={entry.figmaLink} icon={<Frame size={15} className="text-violet-500" />} />
+                  <LinkRow label="Source" href={entry.sourceLink} icon={<ExternalLink size={15} className="text-blue-500" />} />
+                  <LinkRow label="Folder" href={entry.folderLink} icon={<Folder size={15} className="text-amber-500" />} />
+                  <LinkRow label="Admin Panel" href={entry.adminPanelLink} icon={<Monitor size={15} className="text-emerald-500" />} />
+                  <LinkRow label="Performance Copies" href={entry.performanceCopiesLink} icon={<ExternalLink size={15} className="text-rose-500" />} />
+                  <LinkRow label="Digital Copies" href={entry.digitalCopiesLink} icon={<ExternalLink size={15} className="text-indigo-500" />} />
+                  <LinkRow label="Copy Deck" href={entry.copyDeckLink} icon={<ExternalLink size={15} className="text-orange-500" />} />
+                </div>
               </div>
             )}
 
-            {entry.description && <TextRow label="Description" value={entry.description} />}
+            {/* Metadata */}
+            {hasMeta && (
+              <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-4">
+                <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide">Title Metadata</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  <FieldRow label="Rightholder" value={entry.rightholder} />
+                  <FieldRow label="Year" value={entry.year?.toString()} />
+                  <FieldRow label="Age Restriction" value={entry.restrictionAge} />
+                  <FieldRow label="Genres" value={entry.genres} />
+                  <FieldRow label="Countries" value={entry.countries} />
+                </div>
+              </div>
+            )}
+
+            {/* Arabic Texts */}
+            {hasArabic && (
+              <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-4" dir="rtl">
+                <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide" dir="ltr">Arabic Texts</h2>
+                <FieldRow label="عنوان" value={entry.arabicTitle} />
+                <TextRow label="وصف" value={entry.arabicDescription} />
+                <TextRow label="نسخة قصيرة" value={entry.arabicShortCopy} />
+                <TextRow label="نسخة تسويقية" value={entry.arabicMarketingCopy} />
+                <TextRow label="ملاحظات" value={entry.arabicNotes} />
+              </div>
+            )}
           </div>
 
-          {/* Links */}
-          {hasLinks && (
-            <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-4">
-              <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide">Links</h2>
-              <div className="flex flex-col gap-2.5">
-                <LinkRow label="Figma" href={entry.figmaLink} icon={<Frame size={15} className="text-violet-500" />} />
-                <LinkRow label="Source" href={entry.sourceLink} icon={<ExternalLink size={15} className="text-blue-500" />} />
-                <LinkRow label="Folder" href={entry.folderLink} icon={<Folder size={15} className="text-amber-500" />} />
-                <LinkRow label="Admin Panel" href={entry.adminPanelLink} icon={<Monitor size={15} className="text-emerald-500" />} />
-                <LinkRow label="Performance Copies" href={entry.performanceCopiesLink} icon={<ExternalLink size={15} className="text-rose-500" />} />
-                <LinkRow label="Digital Copies" href={entry.digitalCopiesLink} icon={<ExternalLink size={15} className="text-indigo-500" />} />
-                <LinkRow label="Copy Deck" href={entry.copyDeckLink} icon={<ExternalLink size={15} className="text-orange-500" />} />
+          {/* ── Right sidebar ── */}
+          <div className="lg:sticky lg:top-6 flex flex-col gap-4">
+            <div className="bg-white rounded-2xl card-shadow p-5 flex flex-col gap-4">
+              <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Materials</h2>
+              <div className="flex flex-col divide-y divide-neutral-50">
+                {HIGHLIGHT_ROWS.map(({ field, label }) => (
+                  <div key={field} className="flex items-center justify-between py-2.5 gap-2">
+                    <span className="text-sm text-neutral-600">{label}</span>
+                    <MaterialStatusBadge status={entry[field]} />
+                  </div>
+                ))}
               </div>
+              {entry.highlightsNotes && (
+                <div className="pt-2 border-t border-neutral-100">
+                  <p className="text-xs text-neutral-500 leading-relaxed">{entry.highlightsNotes}</p>
+                </div>
+              )}
             </div>
-          )}
-
-          {/* Metadata */}
-          {hasMeta && (
-            <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-4">
-              <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide">Title Metadata</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <FieldRow label="Rightholder" value={entry.rightholder} />
-                <FieldRow label="Year" value={entry.year?.toString()} />
-                <FieldRow label="Age Restriction" value={entry.restrictionAge} />
-                <FieldRow label="Genres" value={entry.genres} />
-                <FieldRow label="Countries" value={entry.countries} />
-              </div>
-            </div>
-          )}
-
-          {/* Arabic Texts */}
-          {hasArabic && (
-            <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-4" dir="rtl">
-              <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide" dir="ltr">Arabic Texts</h2>
-              <FieldRow label="عنوان" value={entry.arabicTitle} />
-              <TextRow label="وصف" value={entry.arabicDescription} />
-              <TextRow label="نسخة قصيرة" value={entry.arabicShortCopy} />
-              <TextRow label="نسخة تسويقية" value={entry.arabicMarketingCopy} />
-              <TextRow label="ملاحظات" value={entry.arabicNotes} />
-            </div>
-          )}
-
-          {/* Highlights */}
-          {hasHighlights && (
-            <div className="bg-white rounded-2xl card-shadow p-7 flex flex-col gap-4">
-              <h2 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide">Highlights Material</h2>
-              <div className="rounded-xl border border-neutral-100 overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-neutral-50 border-b border-neutral-100">
-                      <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide">Material</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {HIGHLIGHT_ROWS.map(({ field, label }, i) => (
-                      <tr key={field} className={i % 2 === 0 ? "bg-white" : "bg-neutral-50/50"}>
-                        <td className="px-4 py-2.5 font-medium text-neutral-700">{label}</td>
-                        <td className="px-4 py-2.5"><MaterialStatusBadge status={entry[field]} /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {entry.highlightsNotes && <TextRow label="Notes" value={entry.highlightsNotes} />}
-            </div>
-          )}
+          </div>
         </div>
       </main>
     </div>
