@@ -3,8 +3,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-const urlField = z.string().url().or(z.literal("")).optional().transform(v => v || null);
-const strField = z.string().optional().transform(v => v || null);
+const urlField = z.union([z.string().url(), z.literal(""), z.null()]).optional().transform(v => v || null);
+const strField = z.union([z.string(), z.null()]).optional().transform(v => v || null);
 
 const schema = z.object({
   titleName: z.string().min(1),
