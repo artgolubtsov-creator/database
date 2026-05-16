@@ -17,6 +17,11 @@ interface Entry {
   countries: string | null;
   genres: string | null;
   portfolio: string;
+  mainPosterStatus: string | null;
+  characterPostersStatus: string | null;
+  trailerStatus: string | null;
+  teaserStatus: string | null;
+  episodesStatus: string | null;
   figmaLink: string | null;
   sourceLink: string | null;
   folderLink: string | null;
@@ -53,6 +58,14 @@ const TYPE_BADGE: Record<string, string> = {
   ORIGINAL: "bg-amber-100 text-amber-700",
 };
 
+const HIGHLIGHT_INDICATORS: { label: string; key: keyof Entry }[] = [
+  { label: "Poster",     key: "mainPosterStatus" },
+  { label: "Chars",      key: "characterPostersStatus" },
+  { label: "Trailer",    key: "trailerStatus" },
+  { label: "Teaser",     key: "teaserStatus" },
+  { label: "Episodes",   key: "episodesStatus" },
+];
+
 const LINK_INDICATORS: { label: string; key: keyof Entry }[] = [
   { label: "Figma",     key: "figmaLink" },
   { label: "Source",    key: "sourceLink" },
@@ -64,21 +77,53 @@ const LINK_INDICATORS: { label: string; key: keyof Entry }[] = [
   { label: "Portfolio", key: "portfolio" },
 ];
 
+const STATUS_COLORS: Record<string, string> = {
+  ADDED:            "text-emerald-500",
+  NOT_RECEIVED_YET: "text-amber-500",
+  NOT_REQUIRED:     "text-neutral-400",
+  REQUEST_FROM_OTT: "text-blue-500",
+};
+
+const STATUS_SHORT: Record<string, string> = {
+  ADDED:            "Added",
+  NOT_RECEIVED_YET: "Pending",
+  NOT_REQUIRED:     "N/A",
+  REQUEST_FROM_OTT: "OTT",
+};
+
 function StatusCell({ entry }: { entry: Entry }) {
   return (
-    <div className="grid grid-cols-4 gap-x-3 gap-y-2 min-w-[180px]">
-      {LINK_INDICATORS.map(({ label, key }) => {
-        const val = entry[key];
-        const has = key === "portfolio" ? (!!val && val !== "-") : !!val;
-        return (
-          <div key={label} className="flex flex-col items-center gap-0.5">
-            <span className="text-[10px] text-neutral-400 leading-none">{label}</span>
-            <span className={`text-[11px] font-semibold leading-none ${has ? "text-emerald-500" : "text-red-400"}`}>
-              {has ? "Yes" : "No"}
-            </span>
-          </div>
-        );
-      })}
+    <div className="flex flex-col gap-2.5 min-w-[200px]">
+      {/* Highlight material statuses */}
+      <div className="grid grid-cols-5 gap-x-2 gap-y-1">
+        {HIGHLIGHT_INDICATORS.map(({ label, key }) => {
+          const val = entry[key] as string | null;
+          return (
+            <div key={label} className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-neutral-400 leading-none">{label}</span>
+              <span className={`text-[10px] font-semibold leading-none ${val ? (STATUS_COLORS[val] ?? "text-neutral-500") : "text-neutral-300"}`}>
+                {val ? (STATUS_SHORT[val] ?? val) : "—"}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Link availability */}
+      <div className="border-t border-neutral-100 pt-2 grid grid-cols-4 gap-x-2 gap-y-1">
+        {LINK_INDICATORS.map(({ label, key }) => {
+          const val = entry[key];
+          const has = key === "portfolio" ? (!!val && val !== "-") : !!val;
+          return (
+            <div key={label} className="flex flex-col items-center gap-0.5">
+              <span className="text-[9px] text-neutral-400 leading-none">{label}</span>
+              <span className={`text-[10px] font-semibold leading-none ${has ? "text-emerald-500" : "text-red-400"}`}>
+                {has ? "Yes" : "No"}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
