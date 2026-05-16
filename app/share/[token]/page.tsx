@@ -160,6 +160,8 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
           <div className="lg:sticky lg:top-6 flex flex-col gap-4">
             <div className="bg-white rounded-2xl card-shadow p-5 flex flex-col gap-4">
               <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Materials</h2>
+
+              {/* Highlight statuses */}
               <div className="flex flex-col divide-y divide-neutral-50">
                 {HIGHLIGHT_ROWS.map(({ field, label }) => (
                   <div key={field} className="flex items-center justify-between py-2.5 gap-2">
@@ -169,10 +171,32 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
                 ))}
               </div>
               {entry.highlightsNotes && (
-                <div className="pt-2 border-t border-neutral-100">
-                  <p className="text-xs text-neutral-500 leading-relaxed">{entry.highlightsNotes}</p>
-                </div>
+                <p className="text-xs text-neutral-500 leading-relaxed">{entry.highlightsNotes}</p>
               )}
+
+              {/* Link availability */}
+              <div className="border-t border-neutral-100 pt-4 flex flex-col gap-2">
+                <span className="text-xs font-medium text-neutral-400 uppercase tracking-wide">Links</span>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                  {([
+                    { label: "Figma",     val: entry.figmaLink },
+                    { label: "Source",    val: entry.sourceLink },
+                    { label: "Folder",    val: entry.folderLink },
+                    { label: "Admin",     val: entry.adminPanelLink },
+                    { label: "Perf",      val: entry.performanceCopiesLink },
+                    { label: "Digital",   val: entry.digitalCopiesLink },
+                    { label: "Deck",      val: entry.copyDeckLink },
+                    { label: "Portfolio", val: entry.portfolio && entry.portfolio !== "-" ? entry.portfolio : null },
+                  ] as { label: string; val: string | null | undefined }[]).map(({ label, val }) => (
+                    <div key={label} className="flex items-center justify-between gap-1">
+                      <span className="text-xs text-neutral-400">{label}</span>
+                      <span className={`text-xs font-semibold ${val ? "text-emerald-500" : "text-red-400"}`}>
+                        {val ? "Yes" : "No"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
