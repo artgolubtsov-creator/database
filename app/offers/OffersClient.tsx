@@ -28,14 +28,6 @@ function groupByTariff(offers: Offer[]): Map<Tariff, Offer[]> {
   return map;
 }
 
-function buildMatrix(offers: Offer[], platforms: Platform[]): Map<string, Map<Platform, Offer>> {
-  const matrix = new Map<string, Map<Platform, Offer>>();
-  for (const o of offers) {
-    if (!matrix.has(o.country)) matrix.set(o.country, new Map());
-    matrix.get(o.country)!.set(o.platform, o);
-  }
-  return matrix;
-}
 
 function formatDate(iso: string): string {
   try {
@@ -118,10 +110,11 @@ function CountryMultiselect({ value, onChange }: { value: string[]; onChange: (v
   );
 }
 
-// ─── Copy Field ──────────────────────────────────────────────────────────────
+// ─── Copy Cell ───────────────────────────────────────────────────────────────
 
-function CopyField({ label, text, rtl }: { label: string; text: string; rtl?: boolean }) {
+function CopyCell({ text }: { text?: string | null }) {
   const [copied, setCopied] = useState(false);
+  if (!text) return <span className="text-neutral-300 text-xs">—</span>;
   const copy = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(text);
@@ -129,16 +122,11 @@ function CopyField({ label, text, rtl }: { label: string; text: string; rtl?: bo
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <div className="group/copy flex items-start gap-1.5 mt-1.5">
-      <div className="flex-1 min-w-0">
-        <span className="block text-[9px] font-semibold text-neutral-400 uppercase tracking-wide leading-none mb-0.5">{label}</span>
-        <span className={`block text-[11px] text-neutral-700 leading-snug ${rtl ? 'text-right' : ''}`} dir={rtl ? 'rtl' : undefined}>
-          {text}
-        </span>
-      </div>
+    <div className="group/copy flex items-start gap-1.5">
+      <span className="flex-1 text-xs text-neutral-700 leading-snug">{text}</span>
       <button
         onClick={copy}
-        className="shrink-0 mt-3 p-0.5 rounded text-neutral-300 hover:text-neutral-600 hover:bg-neutral-100 transition-colors opacity-0 group-hover/copy:opacity-100"
+        className="shrink-0 p-0.5 rounded text-neutral-300 hover:text-neutral-600 hover:bg-neutral-100 transition-colors opacity-0 group-hover/copy:opacity-100"
         title="Copy"
       >
         {copied ? <CheckIcon size={11} className="text-green-500" /> : <Copy size={11} />}
@@ -147,55 +135,24 @@ function CopyField({ label, text, rtl }: { label: string; text: string; rtl?: bo
   );
 }
 
-// ─── Offer Cell ───────────────────────────────────────────────────────────────
-
-function OfferCell({ offer, onClick }: { offer: Offer; onClick: (o: Offer) => void }) {
-  const dateRange = [offer.dateFrom, offer.dateTo].filter(Boolean).join(' – ');
-  const hasCopy = offer.buttonTextEn || offer.buttonTextAr || offer.disclaimerEn || offer.disclaimerAr;
-
-  return (
-    <div className="px-3 py-2.5">
-      {/* Header — click opens drawer */}
-      <button
-        onClick={() => onClick(offer)}
-        className="w-full text-left group"
-      >
-        <p className="text-xs font-semibold text-neutral-800 group-hover:text-blue-700 leading-snug transition-colors">
-          {offer.offerName}
-        </p>
-        {(dateRange || offer.price || offer.duration) && (
-          <p className="text-[11px] text-neutral-400 mt-0.5">
-            {dateRange || [offer.price, offer.duration].filter(Boolean).join(' · ')}
-          </p>
-        )}
-      </button>
-
-      {/* Inline copy fields */}
-      {hasCopy && (
-        <div className="mt-2 pt-2 border-t border-neutral-100 flex flex-col gap-0">
-          {offer.buttonTextEn  && <CopyField label="Button EN"      text={offer.buttonTextEn} />}
-          {offer.buttonTextAr  && <CopyField label="Button AR"      text={offer.buttonTextAr} rtl />}
-          {offer.disclaimerEn  && <CopyField label="Under btn EN"   text={offer.disclaimerEn} />}
-          {offer.disclaimerAr  && <CopyField label="Under btn AR"   text={offer.disclaimerAr} rtl />}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── Tariff Table ─────────────────────────────────────────────────────────────
 
 function TariffTable({
-  tariff, offers, activePlatforms, activeCountries, onSelectOffer,
+  tariff, offers, platformFilter, activeCountries, onSelectOffer,
 }: {
   tariff: Tariff;
   offers: Offer[];
-  activePlatforms: Platform[];
+  platformFilter: Platform | 'All';
   activeCountries: string[];
   onSelectOffer: (o: Offer) => void;
 }) {
-  const matrix = buildMatrix(offers, activePlatforms);
-  const rows = activeCountries.filter(c => matrix.has(c) || offers.some(o => o.country === c));
+  const rows = offers
+    .filter(o => {
+      if (activeCountries.length > 0 && !activeCountries.includes(o.country)) return false;
+      if (platformFilter !== 'All' && o.platform !== platformFilter) return false;
+      return true;
+    })
+    .sort((a, b) => a.country.localeCompare(b.country) || a.platform.localeCompare(b.platform));
 
   if (rows.length === 0) return null;
 
@@ -206,28 +163,43 @@ function TariffTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-neutral-50 border-b border-neutral-100">
-              <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide w-24">Country</th>
-              {activePlatforms.map(p => (
-                <th key={p} className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide">{p}</th>
-              ))}
+              <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide w-28">Country</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide">Offer</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide">Button EN</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide">Under btn EN</th>
+              <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide w-36">Dates</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((country, i) => {
-              const platformMap = matrix.get(country);
+            {rows.map((offer, i) => {
+              const dateRange = [offer.dateFrom, offer.dateTo].filter(Boolean).join(' – ');
               return (
-                <tr key={country} className={i % 2 === 0 ? 'bg-white' : 'bg-neutral-50/40'}>
-                  <td className="px-4 py-2.5 text-sm font-medium text-neutral-700">{country}</td>
-                  {activePlatforms.map(p => {
-                    const offer = platformMap?.get(p);
-                    return (
-                      <td key={p} className="px-2 py-1.5 align-top">
-                        {offer
-                          ? <OfferCell offer={offer} onClick={onSelectOffer} />
-                          : <span className="text-neutral-300 text-xs px-3">—</span>}
-                      </td>
-                    );
-                  })}
+                <tr key={offer.id} className={i % 2 === 0 ? 'bg-white' : 'bg-neutral-50/40'}>
+                  <td className="px-4 py-3 align-top">
+                    <span className="block text-sm font-medium text-neutral-700">{offer.country}</span>
+                    <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-500">{offer.platform}</span>
+                  </td>
+                  <td className="px-4 py-3 align-top">
+                    <button onClick={() => onSelectOffer(offer)} className="text-left group">
+                      <span className="block text-xs font-semibold text-neutral-800 group-hover:text-blue-700 transition-colors leading-snug">
+                        {offer.offerName}
+                      </span>
+                      {(offer.offerValue || offer.price) && (
+                        <span className="block text-[11px] text-neutral-400 mt-0.5">
+                          {offer.offerValue || [offer.price, offer.duration].filter(Boolean).join(' · ')}
+                        </span>
+                      )}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 align-top max-w-[200px]">
+                    <CopyCell text={offer.buttonTextEn} />
+                  </td>
+                  <td className="px-4 py-3 align-top max-w-[200px]">
+                    <CopyCell text={offer.disclaimerEn} />
+                  </td>
+                  <td className="px-4 py-3 align-top text-[11px] text-neutral-500 whitespace-nowrap">
+                    {dateRange || offer.date || '—'}
+                  </td>
                 </tr>
               );
             })}
@@ -379,7 +351,6 @@ function OffersTable({
   error: string | null;
   onSelectOffer: (o: Offer) => void;
 }) {
-  const activePlatforms = filters.platform === 'All' ? PLATFORMS : [filters.platform as Platform];
   const activeCountries = filters.countries.length > 0 ? filters.countries : [...COUNTRIES];
 
   if (loading) {
@@ -432,7 +403,7 @@ function OffersTable({
                     key={tariff}
                     tariff={tariff}
                     offers={tariffOffers}
-                    activePlatforms={activePlatforms}
+                    platformFilter={filters.platform}
                     activeCountries={activeCountries}
                     onSelectOffer={onSelectOffer}
                   />
@@ -453,7 +424,7 @@ function OffersTable({
           key={tariff}
           tariff={tariff}
           offers={tariffOffers}
-          activePlatforms={activePlatforms}
+          platformFilter={filters.platform}
           activeCountries={activeCountries}
           onSelectOffer={onSelectOffer}
         />
