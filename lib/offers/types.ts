@@ -44,7 +44,7 @@ export type OfferFilters = {
 };
 
 export const DEFAULT_FILTERS: OfferFilters = {
-  offerType: 'future',
+  offerType: 'current',
   countries: [],
   tariff: 'All',
   platform: 'All',

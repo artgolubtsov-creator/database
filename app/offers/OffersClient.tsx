@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronDown, Check, Calendar } from "lucide-react";
+import { X, ChevronDown, Check, Calendar, Copy, Check as CheckIcon } from "lucide-react";
 import type { Offer, OfferFilters, Tariff, Platform, Period } from "@/lib/offers/types";
 import { COUNTRIES, TARIFFS, PLATFORMS, DEFAULT_FILTERS } from "@/lib/offers/types";
 import { futureOffersAdapter, currentOffersAdapter, oldOffersAdapter } from "@/lib/offers/adapters";
@@ -118,43 +118,68 @@ function CountryMultiselect({ value, onChange }: { value: string[]; onChange: (v
   );
 }
 
+// ─── Copy Field ──────────────────────────────────────────────────────────────
+
+function CopyField({ label, text, rtl }: { label: string; text: string; rtl?: boolean }) {
+  const [copied, setCopied] = useState(false);
+  const copy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <div className="group/copy flex items-start gap-1.5 mt-1.5">
+      <div className="flex-1 min-w-0">
+        <span className="block text-[9px] font-semibold text-neutral-400 uppercase tracking-wide leading-none mb-0.5">{label}</span>
+        <span className={`block text-[11px] text-neutral-700 leading-snug ${rtl ? 'text-right' : ''}`} dir={rtl ? 'rtl' : undefined}>
+          {text}
+        </span>
+      </div>
+      <button
+        onClick={copy}
+        className="shrink-0 mt-3 p-0.5 rounded text-neutral-300 hover:text-neutral-600 hover:bg-neutral-100 transition-colors opacity-0 group-hover/copy:opacity-100"
+        title="Copy"
+      >
+        {copied ? <CheckIcon size={11} className="text-green-500" /> : <Copy size={11} />}
+      </button>
+    </div>
+  );
+}
+
 // ─── Offer Cell ───────────────────────────────────────────────────────────────
 
 function OfferCell({ offer, onClick }: { offer: Offer; onClick: (o: Offer) => void }) {
   const dateRange = [offer.dateFrom, offer.dateTo].filter(Boolean).join(' – ');
+  const hasCopy = offer.buttonTextEn || offer.buttonTextAr || offer.disclaimerEn || offer.disclaimerAr;
+
   return (
-    <button
-      onClick={() => onClick(offer)}
-      className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group"
-    >
-      {/* Button texts */}
-      {offer.buttonTextEn ? (
-        <>
-          <p className="text-xs font-medium text-neutral-800 group-hover:text-blue-700 leading-snug line-clamp-2">
-            {offer.buttonTextEn}
-          </p>
-          {offer.buttonTextAr && (
-            <p className="text-[11px] text-neutral-500 mt-0.5 line-clamp-1 text-right" dir="rtl">
-              {offer.buttonTextAr}
-            </p>
-          )}
-        </>
-      ) : (
-        <p className="text-xs font-medium text-neutral-800 group-hover:text-blue-700 leading-snug line-clamp-2">
+    <div className="px-3 py-2.5">
+      {/* Header — click opens drawer */}
+      <button
+        onClick={() => onClick(offer)}
+        className="w-full text-left group"
+      >
+        <p className="text-xs font-semibold text-neutral-800 group-hover:text-blue-700 leading-snug transition-colors">
           {offer.offerName}
         </p>
+        {(dateRange || offer.price || offer.duration) && (
+          <p className="text-[11px] text-neutral-400 mt-0.5">
+            {dateRange || [offer.price, offer.duration].filter(Boolean).join(' · ')}
+          </p>
+        )}
+      </button>
+
+      {/* Inline copy fields */}
+      {hasCopy && (
+        <div className="mt-2 pt-2 border-t border-neutral-100 flex flex-col gap-0">
+          {offer.buttonTextEn  && <CopyField label="Button EN"      text={offer.buttonTextEn} />}
+          {offer.buttonTextAr  && <CopyField label="Button AR"      text={offer.buttonTextAr} rtl />}
+          {offer.disclaimerEn  && <CopyField label="Under btn EN"   text={offer.disclaimerEn} />}
+          {offer.disclaimerAr  && <CopyField label="Under btn AR"   text={offer.disclaimerAr} rtl />}
+        </div>
       )}
-      {/* Date range */}
-      {dateRange && (
-        <p className="text-[11px] text-neutral-400 mt-1">{dateRange}</p>
-      )}
-      {/* Fallback: price · duration if no date range */}
-      {!dateRange && (offer.price || offer.duration) && (
-        <p className="text-[11px] text-neutral-400 mt-0.5">
-          {[offer.price, offer.duration].filter(Boolean).join(' · ')}
-        </p>
-      )}
-    </button>
+    </div>
   );
 }
 
