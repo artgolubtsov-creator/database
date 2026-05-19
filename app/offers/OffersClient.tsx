@@ -112,7 +112,7 @@ function CountryMultiselect({ value, onChange }: { value: string[]; onChange: (v
 
 // ─── Copy Cell ───────────────────────────────────────────────────────────────
 
-function CopyCell({ text }: { text?: string | null }) {
+function CopyCell({ text, rtl }: { text?: string | null; rtl?: boolean }) {
   const [copied, setCopied] = useState(false);
   if (!text) return <span className="text-neutral-300 text-xs">—</span>;
   const copy = (e: React.MouseEvent) => {
@@ -122,8 +122,8 @@ function CopyCell({ text }: { text?: string | null }) {
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <div className="group/copy flex items-start gap-1.5">
-      <span className="flex-1 text-xs text-neutral-700 leading-snug">{text}</span>
+    <div className={`group/copy flex items-start gap-1.5 ${rtl ? 'flex-row-reverse' : ''}`}>
+      <span className={`flex-1 text-xs text-neutral-700 leading-snug ${rtl ? 'text-right' : ''}`} dir={rtl ? 'rtl' : undefined}>{text}</span>
       <button
         onClick={copy}
         className="shrink-0 p-0.5 rounded text-neutral-300 hover:text-neutral-600 hover:bg-neutral-100 transition-colors opacity-0 group-hover/copy:opacity-100"
@@ -167,6 +167,8 @@ function TariffTable({
               <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide">Offer</th>
               <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide">Button EN</th>
               <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide">Under btn EN</th>
+              <th className="px-4 py-2.5 text-right text-xs font-medium text-neutral-400 uppercase tracking-wide">Button AR</th>
+              <th className="px-4 py-2.5 text-right text-xs font-medium text-neutral-400 uppercase tracking-wide">Under btn AR</th>
               <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-400 uppercase tracking-wide w-36">Dates</th>
             </tr>
           </thead>
@@ -196,6 +198,12 @@ function TariffTable({
                   </td>
                   <td className="px-4 py-3 align-top max-w-[200px]">
                     <CopyCell text={offer.disclaimerEn} />
+                  </td>
+                  <td className="px-4 py-3 align-top max-w-[200px]">
+                    <CopyCell text={offer.buttonTextAr} rtl />
+                  </td>
+                  <td className="px-4 py-3 align-top max-w-[200px]">
+                    <CopyCell text={offer.disclaimerAr} rtl />
                   </td>
                   <td className="px-4 py-3 align-top text-[11px] text-neutral-500 whitespace-nowrap">
                     {dateRange || offer.date || '—'}
