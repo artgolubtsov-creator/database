@@ -1,12 +1,12 @@
 export type OfferType = 'future' | 'current' | 'old';
 export type Tariff = 'Basic' | 'Premium' | 'Crunchyroll';
 export type Platform = 'iOS' | 'Android' | 'Native';
-export type OfferKind = 'Main product' | 'Performance' | 'Trial' | 'Promo';
+export type OfferKind = 'Main product' | 'Performance' | 'Test product';
 
 export const COUNTRIES = ['UAE', 'Egypt', 'Kuwait', 'Qatar', 'Oman', 'KSA', 'Bahrain'] as const;
 export const TARIFFS: Tariff[] = ['Basic', 'Premium', 'Crunchyroll'];
 export const PLATFORMS: Platform[] = ['iOS', 'Android', 'Native'];
-export const OFFER_KINDS: OfferKind[] = ['Main product', 'Performance', 'Trial', 'Promo'];
+export const OFFER_KINDS: OfferKind[] = ['Main product', 'Performance', 'Test product'];
 
 export type Offer = {
   id: string;

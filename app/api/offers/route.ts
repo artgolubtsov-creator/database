@@ -6,7 +6,7 @@ import { canManageOffers } from "@/lib/roles";
 
 const offerSchema = z.object({
   type:         z.enum(["future", "current", "old"]),
-  offerKind:    z.enum(["Main product", "Performance", "Trial", "Promo"]).optional().nullable(),
+  offerKind:    z.enum(["Main product", "Performance", "Test product"]).optional().nullable(),
   date:         z.string().optional().nullable(),
   country:      z.string().min(1),
   tariff:       z.enum(["Basic", "Premium", "Crunchyroll"]),

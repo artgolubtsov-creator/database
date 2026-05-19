@@ -140,8 +140,7 @@ function CopyCell({ text, rtl }: { text?: string | null; rtl?: boolean }) {
 const KIND_COLORS: Record<OfferKind, string> = {
   'Main product': 'bg-blue-50 text-blue-600',
   'Performance':  'bg-violet-50 text-violet-600',
-  'Trial':        'bg-emerald-50 text-emerald-600',
-  'Promo':        'bg-amber-50 text-amber-600',
+  'Test product': 'bg-amber-50 text-amber-600',
 };
 
 function TariffTable({

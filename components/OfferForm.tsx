@@ -39,7 +39,7 @@ const TARIFF_OPTIONS   = [{ value: "Basic", label: "Basic" }, { value: "Premium"
 const PLATFORM_OPTIONS = [{ value: "iOS", label: "iOS" }, { value: "Android", label: "Android" }, { value: "Native", label: "Native" }];
 const COUNTRY_OPTIONS  = ["UAE", "Egypt", "Kuwait", "Qatar", "Oman", "KSA", "Bahrain"].map(c => ({ value: c, label: c }));
 const STATUS_OPTIONS   = ["Planned", "Draft", "Active", "Expired"].map(s => ({ value: s, label: s }));
-const KIND_OPTIONS     = ["Main product", "Performance", "Trial", "Promo"].map(k => ({ value: k, label: k }));
+const KIND_OPTIONS     = ["Main product", "Performance", "Test product"].map(k => ({ value: k, label: k }));
 
 interface Props {
   mode: "create" | "edit";
