@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { canManageContent } from "@/lib/roles";
 
@@ -47,5 +48,6 @@ export async function POST(req: NextRequest) {
     data: { ...parsed.data, createdById: session.user.id },
   });
 
+  revalidatePath("/brand-materials");
   return NextResponse.json(material, { status: 201 });
 }

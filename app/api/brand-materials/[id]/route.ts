@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { canManageContent } from "@/lib/roles";
 
@@ -28,6 +29,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   const material = await prisma.brandMaterial.update({ where: { id }, data: parsed.data });
+  revalidatePath("/brand-materials");
   return NextResponse.json(material);
 }
 
@@ -39,5 +41,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params;
   await prisma.brandMaterial.delete({ where: { id } });
+  revalidatePath("/brand-materials");
   return NextResponse.json({ ok: true });
 }

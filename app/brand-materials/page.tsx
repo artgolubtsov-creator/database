@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { unstable_cache } from "next/cache";
 import { Navbar } from "@/components/Navbar";
 import { ExternalLink, Plus, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -24,10 +25,12 @@ export default async function BrandMaterialsPage() {
   const role = session!.user.role;
   const canEdit = canManageContent(role);
 
-  const materials = await prisma.brandMaterial.findMany({
-    where: { isPublic: true },
-    orderBy: [{ category: "asc" }, { updatedAt: "desc" }],
-  });
+  const getMaterials = unstable_cache(
+    () => prisma.brandMaterial.findMany({ where: { isPublic: true }, orderBy: [{ category: "asc" }, { updatedAt: "desc" }] }),
+    ["brand-materials-list"],
+    { revalidate: 60 }
+  );
+  const materials = await getMaterials();
 
   const grouped = CATEGORY_ORDER.reduce<Record<string, typeof materials>>((acc, cat) => {
     acc[cat] = materials.filter((m) => m.category === cat);
