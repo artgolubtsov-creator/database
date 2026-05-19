@@ -46,6 +46,7 @@ model User {
   updatedAt      DateTime        @updatedAt
   entries        Entry[]         @relation("CreatedBy")
   brandMaterials BrandMaterial[] @relation("CreatedBrandMaterials")
+  offerRecords   OfferRecord[]   @relation("CreatedOffers")
 }
 
 model Entry {
@@ -100,6 +101,37 @@ model Entry {
   @@index([titleId])
   @@index([kpId])
   @@index([contentType])
+}
+
+model OfferRecord {
+  id           String   @id @default(cuid())
+  type         String   // future | current | old
+  date         String?  // planned change date (future offers only)
+  country      String
+  tariff       String   // Basic | Premium | Crunchyroll
+  platform     String   // iOS | Android | Native
+  offerName    String
+  offerValue   String?
+  price        String?
+  duration     String?
+  promoCode    String?
+  description  String?
+  source       String   @default("Manual")
+  dateFrom     String?
+  dateTo       String?
+  comment      String?
+  status       String?
+  buttonTextEn String?
+  buttonTextAr String?
+  disclaimerEn String?
+  disclaimerAr String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdById  String
+  createdBy    User     @relation("CreatedOffers", fields: [createdById], references: [id])
+
+  @@index([type])
+  @@index([country])
 }
 
 model BrandMaterial {

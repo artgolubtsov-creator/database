@@ -8,6 +8,7 @@ import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { Plus, Pencil, Trash2, ExternalLink, Upload } from "lucide-react";
 import { DeleteEntryButton } from "./DeleteEntryButton";
+import { DeleteOfferButton } from "./DeleteOfferButton";
 
 const CATEGORY_LABEL: Record<string, string> = {
   GUIDE: "Guide",
@@ -20,10 +21,11 @@ export default async function AdminPage() {
   const session = await auth();
   if (session?.user.role !== "ADMIN") redirect("/dashboard");
 
-  const [entries, users, brandMaterials] = await Promise.all([
+  const [entries, users, brandMaterials, offerRecords] = await Promise.all([
     prisma.entry.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
     prisma.user.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.brandMaterial.findMany({ orderBy: [{ category: "asc" }, { createdAt: "desc" }], take: 50 }),
+    prisma.offerRecord.findMany({ orderBy: [{ type: "asc" }, { country: "asc" }, { createdAt: "desc" }] }),
   ]);
 
   return (
@@ -141,6 +143,71 @@ export default async function AdminPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </section>
+
+        {/* Offers */}
+        <section id="offers" className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-neutral-900">Offers</h2>
+              <p className="text-sm text-neutral-500 mt-0.5">{offerRecords.length} records</p>
+            </div>
+            <Link href="/admin/offers/new">
+              <Button size="sm"><Plus size={15} /> New Offer</Button>
+            </Link>
+          </div>
+          <div className="bg-white rounded-2xl card-shadow overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-neutral-100 text-left">
+                  <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide">Offer</th>
+                  <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide">Type</th>
+                  <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden md:table-cell">Country</th>
+                  <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden md:table-cell">Tariff / Platform</th>
+                  <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden lg:table-cell">Button EN</th>
+                  <th className="px-5 py-3.5 w-24"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {offerRecords.map((o) => (
+                  <tr key={o.id} className="border-b border-neutral-50 hover:bg-neutral-50 transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium text-neutral-900">{o.offerName}</span>
+                        {o.price && <span className="text-xs text-neutral-400">{o.price}{o.duration ? ` · ${o.duration}` : ""}</span>}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <Badge variant={o.type === "future" ? "blue" : "default"}>
+                        {o.type}
+                      </Badge>
+                    </td>
+                    <td className="px-5 py-3.5 text-neutral-600 hidden md:table-cell">{o.country}</td>
+                    <td className="px-5 py-3.5 hidden md:table-cell">
+                      <div className="flex flex-col gap-0.5 text-xs text-neutral-500">
+                        <span>{o.tariff}</span>
+                        <span>{o.platform}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5 hidden lg:table-cell">
+                      <span className="text-xs text-neutral-500 line-clamp-2">{o.buttonTextEn ?? "—"}</span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <Link href={`/admin/offers/${o.id}/edit`}>
+                          <Button variant="ghost" size="sm"><Pencil size={13} /></Button>
+                        </Link>
+                        <DeleteOfferButton id={o.id} />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {offerRecords.length === 0 && (
+              <div className="py-10 text-center text-sm text-neutral-400">No offers yet — add the first one</div>
+            )}
           </div>
         </section>
 

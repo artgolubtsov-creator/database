@@ -10,52 +10,65 @@ function applyCommonFilters(offers: Offer[], filters: OfferFilters): Offer[] {
   });
 }
 
+async function fetchDbOffers(type: string, filters: OfferFilters): Promise<Offer[]> {
+  try {
+    const params = new URLSearchParams({ type });
+    if (filters.countries.length === 1) params.set('country', filters.countries[0]);
+    if (filters.tariff  !== 'All') params.set('tariff',   filters.tariff);
+    if (filters.platform !== 'All') params.set('platform', filters.platform);
+
+    const res = await fetch(`/api/offers?${params}`);
+    if (!res.ok) return [];
+    const rows = await res.json();
+    return rows.map((r: Record<string, string>) => ({ ...r, type } as Offer));
+  } catch {
+    return [];
+  }
+}
+
+function mergeOffers(dbOffers: Offer[], mockOffers: Offer[]): Offer[] {
+  const dbKeys = new Set(dbOffers.map(o => `${o.country}|${o.tariff}|${o.platform}`));
+  return [...dbOffers, ...mockOffers.filter(o => !dbKeys.has(`${o.country}|${o.tariff}|${o.platform}`))];
+}
+
 // ─── Future Offers ────────────────────────────────────────────────────────────
 // TODO: Replace mock with Google Sheet API call:
 //   const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`);
-//   const raw = await res.json();
-//   return mapSheetRowsToOffers(raw.values);
 export async function futureOffersAdapter(filters: OfferFilters): Promise<Offer[]> {
   const today = new Date().toISOString().slice(0, 10);
-  const offers = MOCK_FUTURE_OFFERS.filter(o => o.date && o.date > today);
-  return applyCommonFilters(offers, filters);
+  const mock  = applyCommonFilters(MOCK_FUTURE_OFFERS.filter(o => o.date && o.date > today), filters);
+  const db    = await fetchDbOffers('future', filters);
+  return applyCommonFilters(mergeOffers(db, mock), { ...filters, countries: [], tariff: 'All', platform: 'All' });
 }
 
 // ─── Current Offers ───────────────────────────────────────────────────────────
 // TODO: Replace mock with DataLens API call:
 //   const res = await fetch(`${DATALENS_ENDPOINT}/current-offers`, { headers: { Authorization: `Bearer ${TOKEN}` } });
-//   const raw = await res.json();
-//   return mapDataLensRowsToOffers(raw, 'current');
 export async function currentOffersAdapter(filters: OfferFilters): Promise<Offer[]> {
-  return applyCommonFilters(MOCK_CURRENT_OFFERS, filters);
+  const mock = applyCommonFilters(MOCK_CURRENT_OFFERS, filters);
+  const db   = await fetchDbOffers('current', filters);
+  return applyCommonFilters(mergeOffers(db, mock), { ...filters, countries: [], tariff: 'All', platform: 'All' });
 }
 
 // ─── Old Offers ───────────────────────────────────────────────────────────────
 // TODO: Replace mock with DataLens API call:
-//   const res = await fetch(`${DATALENS_ENDPOINT}/old-offers?from=${dateFrom}&to=${dateTo}`, { headers: { Authorization: `Bearer ${TOKEN}` } });
-//   const raw = await res.json();
-//   return mapDataLensRowsToOffers(raw, 'old');
+//   const res = await fetch(`${DATALENS_ENDPOINT}/old-offers?from=${dateFrom}&to=${dateTo}`, ...);
 export async function oldOffersAdapter(filters: OfferFilters): Promise<Offer[]> {
-  let offers = [...MOCK_OLD_OFFERS];
+  let mock = [...MOCK_OLD_OFFERS];
 
   const today = new Date();
   let cutoff: Date | null = null;
-
   if (filters.period === '7d')  cutoff = new Date(today.getTime() - 7  * 86400_000);
   if (filters.period === '30d') cutoff = new Date(today.getTime() - 30 * 86400_000);
   if (filters.period === '90d') cutoff = new Date(today.getTime() - 90 * 86400_000);
-  if (filters.period === 'custom' && filters.periodFrom) {
-    cutoff = new Date(filters.periodFrom);
-  }
+  if (filters.period === 'custom' && filters.periodFrom) cutoff = new Date(filters.periodFrom);
 
   if (cutoff) {
     const cutoffStr = cutoff.toISOString().slice(0, 10);
     const toStr = filters.period === 'custom' && filters.periodTo ? filters.periodTo : today.toISOString().slice(0, 10);
-    offers = offers.filter(o => {
-      const d = o.dateTo ?? o.dateFrom ?? '';
-      return d >= cutoffStr && d <= toStr;
-    });
+    mock = mock.filter(o => { const d = o.dateTo ?? o.dateFrom ?? ''; return d >= cutoffStr && d <= toStr; });
   }
 
-  return applyCommonFilters(offers, filters);
+  const db = await fetchDbOffers('old', filters);
+  return applyCommonFilters(mergeOffers(db, mock), { ...filters, countries: [], tariff: 'All', platform: 'All' });
 }
