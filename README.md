@@ -1,36 +1,166 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Yango Play — Content Hub
 
-## Getting Started
+Internal CMS for managing content titles, brand materials, and subscription offers for the Yango Play streaming platform.
 
-First, run the development server:
+**Production:** https://yangoplay.pro
+
+---
+
+## Features
+
+- **Dashboard** — full catalogue of content titles with sorting by year, material statuses, and quick links
+- **Entry cards** — per-title pages with metadata, Arabic copy, material statuses (poster, trailer, teaser, episodes), and asset links
+- **Public share links** — generate a read-only link per title to share with external teams without login
+- **Brand materials** — library of guides, logos, presentations, and active offers
+- **Offers** — subscription offers table grouped by tariff (Basic / Premium / Crunchyroll) and country × platform matrix, with future / current / old views
+- **Admin panel** — user management (create, activate/deactivate, change roles)
+- **Role-based access** — `ADMIN`, `EDITOR`, `VIEWER`
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router, Turbopack) |
+| Auth | NextAuth v5 (credentials + JWT) |
+| Database | PostgreSQL via Supabase |
+| ORM | Prisma 5 |
+| Styling | Tailwind CSS |
+| Animations | Framer Motion |
+| Validation | Zod v4 |
+| Deployment | Vercel |
+
+---
+
+## Local Development
 
 ```bash
+# Install dependencies
+npm install
+
+# Copy env file and fill in values
+cp .env.example .env
+
+# Generate Prisma client
+npx prisma generate
+
+# Run migrations
+npx prisma migrate deploy
+
+# Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App runs at http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+```env
+# PostgreSQL connection via pgbouncer (pooled, for runtime queries)
+DATABASE_URL=postgresql://...?pgbouncer=true&connection_limit=1
 
-To learn more about Next.js, take a look at the following resources:
+# Direct connection (for migrations)
+DIRECT_URL=postgresql://...
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# NextAuth
+AUTH_SECRET=your-secret-here
+NEXTAUTH_URL=http://localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Creating Users
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Users are created via a script (there is no registration UI):
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx ts-node -e "
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
+const db = new PrismaClient();
+db.user.create({
+  data: {
+    email: 'user@example.com',
+    name: 'Name',
+    passwordHash: bcrypt.hashSync('password', 10),
+    role: 'EDITOR', // ADMIN | EDITOR | VIEWER
+  }
+}).then(u => console.log('Created:', u.email)).finally(() => db.$disconnect());
+"
+```
+
+Or use the ready-made script:
+
+```bash
+npx ts-node prisma/create-user.ts
+```
+
+---
+
+## Database Migrations
+
+```bash
+# Create and apply a new migration
+npx prisma migrate dev --name description
+
+# Apply existing migrations (production / CI)
+npx prisma migrate deploy
+
+# Open Prisma Studio
+npx prisma studio
+```
+
+---
+
+## Data Import
+
+To bulk-update `figmaLink` / `sourceLink` from a CSV export:
+
+```bash
+npx ts-node prisma/update-from-sheets.ts /path/to/file.csv
+```
+
+CSV format expected: `mena_id`, `figma_link`, `source_link` columns.
+
+---
+
+## Offers Page
+
+Offers are currently powered by mock data in `lib/offers/mock-data.ts`. Adapters in `lib/offers/adapters.ts` are stubbed with `TODO` comments marking where to plug in real API calls:
+
+- **Future offers** → Google Sheets API
+- **Current / Old offers** → DataLens API
+
+Each offer supports EN and AR button copy fields (`buttonTextEn`, `buttonTextAr`, `disclaimerEn`, `disclaimerAr`).
+
+---
+
+## Project Structure
+
+```
+app/
+  dashboard/        # Content catalogue
+  entries/[id]/     # Entry detail page
+  share/[token]/    # Public read-only share page (no auth)
+  brand-materials/  # Brand asset library
+  offers/           # Subscription offers
+  admin/            # User management + entry editing
+  api/              # REST API routes
+
+components/         # Shared UI components
+lib/
+  offers/           # Offer types, mock data, adapters
+prisma/
+  schema.prisma     # DB schema
+  migrations/       # SQL migrations
+  *.ts              # Utility scripts (import, seed, create-user)
+```
+
+---
+
+## Deployment
+
+Pushes to `main` deploy automatically via Vercel. Environment variables are set in the Vercel project dashboard.
