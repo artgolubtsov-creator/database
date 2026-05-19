@@ -5,6 +5,7 @@ import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/Button";
 import { LogOut, LayoutDashboard, Settings, Palette, Plus, Tag } from "lucide-react";
+import { canManageContent, hasAdminAccess } from "@/lib/roles";
 
 interface NavbarProps {
   role: string;
@@ -18,7 +19,7 @@ export function Navbar({ role, name }: NavbarProps) {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/brand-materials", label: "Brand", icon: Palette },
     { href: "/offers", label: "Offers", icon: Tag },
-    ...(role === "ADMIN" ? [{ href: "/admin", label: "Admin", icon: Settings }] : []),
+    ...(hasAdminAccess(role) ? [{ href: "/admin", label: "Admin", icon: Settings }] : []),
   ];
 
   return (
@@ -52,7 +53,7 @@ export function Navbar({ role, name }: NavbarProps) {
           </nav>
         </div>
         <div className="flex items-center gap-3">
-          {(role === "ADMIN" || role === "EDITOR") && (
+          {canManageContent(role) && (
             <Link href="/admin/entries/new">
               <Button size="sm" variant="ghost">
                 <Plus size={15} />

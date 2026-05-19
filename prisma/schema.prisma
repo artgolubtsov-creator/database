@@ -10,7 +10,10 @@ datasource db {
 
 enum Role {
   ADMIN
-  EDITOR
+  SUPER_EDITOR
+  CONTENT_EDITOR
+  OFFER_MANAGER
+  EDITOR       // legacy — maps to CONTENT_EDITOR
   VIEWER
 }
 

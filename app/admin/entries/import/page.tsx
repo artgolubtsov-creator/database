@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowLeft, Download } from "lucide-react";
 import { ImportClient } from "./ImportClient";
+import { canManageContent } from "@/lib/roles";
 
 const CSV_TEMPLATE = [
   "titleName,portfolio,project,contentType,titleId,kpId,year,genres,countries,description,rightholder,restrictionAge,folderLink,arabicTitle",
@@ -14,7 +15,7 @@ const CSV_TEMPLATE = [
 export default async function ImportEntriesPage() {
   const session = await auth();
   const role = session?.user?.role;
-  if (role !== "ADMIN" && role !== "EDITOR") redirect("/dashboard");
+  if (!canManageContent(role)) redirect("/dashboard");
 
   const templateHref = `data:text/csv;charset=utf-8,${encodeURIComponent(CSV_TEMPLATE)}`;
 

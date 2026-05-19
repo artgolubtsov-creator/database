@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { canManageOffers } from "@/lib/roles";
 
 const patchSchema = z.object({
   type:         z.enum(["future", "current", "old"]).optional(),
@@ -29,7 +30,7 @@ const patchSchema = z.object({
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const role = session?.user?.role;
-  if (!role || (role !== "ADMIN" && role !== "EDITOR")) {
+  if (!role || !canManageOffers(role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -46,7 +47,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
+  if (!canManageOffers(session?.user?.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const schema = z.object({
   name: z.string().min(1).optional().nullable(),
-  role: z.enum(["ADMIN", "EDITOR", "VIEWER"]).optional(),
+  role: z.enum(["ADMIN", "SUPER_EDITOR", "CONTENT_EDITOR", "OFFER_MANAGER", "VIEWER"]).optional(),
   isActive: z.boolean().optional(),
 });
 

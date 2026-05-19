@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { ROLE_LABELS } from "@/lib/roles";
 import { Plus, Pencil } from "lucide-react";
 
 export default async function UsersPage() {
@@ -47,8 +48,8 @@ export default async function UsersPage() {
                     <td className="px-5 py-3.5 text-neutral-900">{user.email}</td>
                     <td className="px-5 py-3.5 text-neutral-600">{user.name ?? "—"}</td>
                     <td className="px-5 py-3.5">
-                      <Badge variant={user.role === "ADMIN" ? "blue" : user.role === "EDITOR" ? "default" : "default"}>
-                        {user.role}
+                      <Badge variant={user.role === "ADMIN" ? "blue" : "default"}>
+                        {ROLE_LABELS[user.role] ?? user.role}
                       </Badge>
                     </td>
                     <td className="px-5 py-3.5">

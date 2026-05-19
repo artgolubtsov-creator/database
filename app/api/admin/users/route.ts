@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
 const schema = z.object({
   email: z.string().email(),
   name: z.string().min(1).optional(),
-  role: z.enum(["ADMIN", "EDITOR", "VIEWER"]),
+  role: z.enum(["ADMIN", "SUPER_EDITOR", "CONTENT_EDITOR", "OFFER_MANAGER", "VIEWER"]),
   password: z.string().min(8),
 });
 

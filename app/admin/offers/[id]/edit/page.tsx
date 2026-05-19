@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { canManageOffers } from "@/lib/roles";
 
 export default async function EditOfferPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const role = session?.user.role;
-  if (role !== "ADMIN" && role !== "EDITOR") redirect("/dashboard");
+  if (!canManageOffers(role)) redirect("/dashboard");
 
   const { id } = await params;
   const offer = await prisma.offerRecord.findUnique({ where: { id } });

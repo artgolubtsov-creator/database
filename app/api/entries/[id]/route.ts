@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { canManageContent } from "@/lib/roles";
 
 const urlField = z.union([z.string().url(), z.literal(""), z.null()]).optional().transform(v => v || null);
 const strField = z.union([z.string(), z.null()]).optional().transform(v => v || null);
@@ -46,7 +47,7 @@ const schema = z.object({
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const role = session?.user?.role;
-  if (!role || (role !== "ADMIN" && role !== "EDITOR")) {
+  if (!role || !canManageContent(role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

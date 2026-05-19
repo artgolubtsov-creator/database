@@ -3,11 +3,12 @@ import { redirect } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { BrandMaterialForm } from "@/components/BrandMaterialForm";
+import { canManageContent } from "@/lib/roles";
 
 export default async function NewBrandMaterialPublicPage() {
   const session = await auth();
   const role = session?.user?.role;
-  if (role !== "ADMIN" && role !== "EDITOR") redirect("/dashboard");
+  if (!canManageContent(role)) redirect("/dashboard");
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -4,11 +4,12 @@ import { redirect, notFound } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { BrandMaterialForm } from "@/components/BrandMaterialForm";
+import { canManageContent } from "@/lib/roles";
 
 export default async function EditBrandMaterialPublicPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const role = session?.user?.role;
-  if (role !== "ADMIN" && role !== "EDITOR") redirect("/dashboard");
+  if (!canManageContent(role)) redirect("/dashboard");
 
   const { id } = await params;
   const material = await prisma.brandMaterial.findUnique({ where: { id } });

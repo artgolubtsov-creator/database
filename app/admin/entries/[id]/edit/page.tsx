@@ -6,11 +6,12 @@ import { EntryForm } from "@/components/EntryForm";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { canManageContent } from "@/lib/roles";
 
 export default async function EditEntryPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const role = session?.user.role;
-  if (role !== "ADMIN" && role !== "EDITOR") redirect("/dashboard");
+  if (!canManageContent(role)) redirect("/dashboard");
 
   const { id } = await params;
   const entry = await prisma.entry.findUnique({ where: { id } });

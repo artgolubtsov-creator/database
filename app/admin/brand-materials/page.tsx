@@ -8,6 +8,7 @@ import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { Plus, Pencil, ExternalLink } from "lucide-react";
 import { DeleteBrandMaterialButton } from "./DeleteBrandMaterialButton";
+import { canManageContent } from "@/lib/roles";
 
 const CATEGORY_LABEL: Record<string, string> = {
   GUIDE: "Guide",
@@ -18,7 +19,8 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 export default async function AdminBrandMaterialsPage() {
   const session = await auth();
-  if (session?.user.role !== "ADMIN") redirect("/dashboard");
+  const role = session?.user.role;
+  if (!canManageContent(role)) redirect("/dashboard");
 
   const materials = await prisma.brandMaterial.findMany({
     orderBy: [{ category: "asc" }, { createdAt: "desc" }],
@@ -26,7 +28,7 @@ export default async function AdminBrandMaterialsPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar role={session.user.role} name={session.user.name} />
+      <Navbar role={session!.user.role} name={session!.user.name} />
       <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">

@@ -5,11 +5,12 @@ import { OfferForm } from "@/components/OfferForm";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { canManageOffers } from "@/lib/roles";
 
 export default async function NewOfferPage() {
   const session = await auth();
   const role = session?.user.role;
-  if (role !== "ADMIN" && role !== "EDITOR") redirect("/dashboard");
+  if (!canManageOffers(role)) redirect("/dashboard");
 
   return (
     <div className="min-h-screen flex flex-col">

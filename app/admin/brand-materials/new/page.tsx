@@ -5,14 +5,16 @@ import { BrandMaterialForm } from "@/components/BrandMaterialForm";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { canManageContent } from "@/lib/roles";
 
 export default async function NewBrandMaterialPage() {
   const session = await auth();
-  if (session?.user.role !== "ADMIN") redirect("/dashboard");
+  const role = session?.user.role;
+  if (!canManageContent(role)) redirect("/dashboard");
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar role={session.user.role} name={session.user.name} />
+      <Navbar role={session!.user.role} name={session!.user.name} />
       <main className="flex-1 max-w-xl mx-auto w-full px-6 py-8">
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-3">

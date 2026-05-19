@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ExternalLink, Frame, Folder, Monitor, Pencil } from "lucide-react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
+import { canManageContent } from "@/lib/roles";
 
 const CONTENT_TYPE_LABELS: Record<string, string> = {
   EXCLUSIVE: "Exclusive",
@@ -97,7 +98,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
             ]} />
             <div className="flex items-center gap-2">
               <CopyLinkButton shareToken={entry.shareToken} />
-              {(session!.user.role === "ADMIN" || session!.user.role === "EDITOR") && (
+              {canManageContent(session!.user.role) && (
                 <Link href={`/admin/entries/${entry.id}/edit`}>
                   <Button variant="secondary" size="sm"><Pencil size={13} /> Edit</Button>
                 </Link>

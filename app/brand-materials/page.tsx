@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { ExternalLink, Plus, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import { canManageContent } from "@/lib/roles";
 
 const CATEGORY_LABEL: Record<string, string> = {
   GUIDE: "Guides",
@@ -21,7 +22,7 @@ function formatUpdatedAt(date: Date): string {
 export default async function BrandMaterialsPage() {
   const session = await auth();
   const role = session!.user.role;
-  const canEdit = role === "ADMIN" || role === "EDITOR";
+  const canEdit = canManageContent(role);
 
   const materials = await prisma.brandMaterial.findMany({
     where: { isPublic: true },

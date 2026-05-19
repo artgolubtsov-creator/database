@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { canManageContent } from "@/lib/roles";
 
 const schema = z.object({
   title: z.string().min(1).optional(),
@@ -15,7 +16,7 @@ const schema = z.object({
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const role = session?.user?.role;
-  if (!role || (role !== "ADMIN" && role !== "EDITOR")) {
+  if (!role || !canManageContent(role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

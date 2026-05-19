@@ -38,7 +38,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
               userId={user.id}
               initialValues={{
                 name: user.name ?? "",
-                role: user.role as "ADMIN" | "EDITOR" | "VIEWER",
+                role: (user.role === "EDITOR" ? "CONTENT_EDITOR" : user.role) as "ADMIN" | "SUPER_EDITOR" | "CONTENT_EDITOR" | "OFFER_MANAGER" | "VIEWER",
                 isActive: user.isActive,
               }}
             />

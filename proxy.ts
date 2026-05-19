@@ -1,12 +1,11 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import { canManageContent, canManageOffers, hasAdminAccess, canManageUsers } from "@/lib/roles";
 
 export default auth((req) => {
   const { nextUrl, auth: session } = req;
   const isLoggedIn = !!session?.user;
   const role = session?.user?.role;
-  const isAdmin = role === "ADMIN";
-  const isEditor = role === "EDITOR";
   const path = nextUrl.pathname;
 
   // Public share links — no auth required
@@ -27,26 +26,33 @@ export default auth((req) => {
     return NextResponse.redirect(new URL(isLoggedIn ? "/dashboard" : "/login", nextUrl));
   }
 
-  // Admin-only routes (strict)
-  const adminOnlyPaths = ["/admin/users", "/admin/brand-materials"];
-  const isAdminOnlyPath =
-    path === "/admin" ||
-    adminOnlyPaths.some((p) => path.startsWith(p));
-
-  if (isAdminOnlyPath && !isAdmin) {
+  // User management — ADMIN only
+  if (path.startsWith("/admin/users") && !canManageUsers(role)) {
     return NextResponse.redirect(new URL("/dashboard", nextUrl));
   }
 
-  // Editor-accessible admin routes: /admin/entries/*
-  if (path.startsWith("/admin/entries") && !isAdmin && !isEditor) {
+  // Admin panel root + brand materials management — content editors and above
+  if (path === "/admin" || path.startsWith("/admin/brand-materials")) {
+    if (!canManageContent(role) && !canManageOffers(role)) {
+      return NextResponse.redirect(new URL("/dashboard", nextUrl));
+    }
+  }
+
+  // Entry management in admin — content managers only
+  if (path.startsWith("/admin/entries") && !canManageContent(role)) {
     return NextResponse.redirect(new URL("/dashboard", nextUrl));
   }
 
-  // Brand materials management outside admin (ADMIN | EDITOR)
+  // Offer management in admin — offer managers only
+  if (path.startsWith("/admin/offers") && !canManageOffers(role)) {
+    return NextResponse.redirect(new URL("/dashboard", nextUrl));
+  }
+
+  // Brand materials management outside admin — content managers only
   const isBrandMgmt =
     path === "/brand-materials/new" ||
     /^\/brand-materials\/[^/]+\/edit/.test(path);
-  if (isBrandMgmt && !isAdmin && !isEditor) {
+  if (isBrandMgmt && !canManageContent(role)) {
     return NextResponse.redirect(new URL("/dashboard", nextUrl));
   }
 });

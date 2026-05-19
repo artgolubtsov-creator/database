@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Plus, Pencil, Trash2, ExternalLink, Upload } from "lucide-react";
 import { DeleteEntryButton } from "./DeleteEntryButton";
 import { DeleteOfferButton } from "./DeleteOfferButton";
+import { canManageContent, canManageUsers, canManageOffers, ROLE_LABELS } from "@/lib/roles";
 
 const CATEGORY_LABEL: Record<string, string> = {
   GUIDE: "Guide",
@@ -19,22 +20,27 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 export default async function AdminPage() {
   const session = await auth();
-  if (session?.user.role !== "ADMIN") redirect("/dashboard");
+  const role = session?.user?.role;
+  const showContent = canManageContent(role);
+  const showOffers  = canManageOffers(role);
+  const showUsers   = canManageUsers(role);
+
+  if (!showContent && !showOffers && !showUsers) redirect("/dashboard");
 
   const [entries, users, brandMaterials, offerRecords] = await Promise.all([
-    prisma.entry.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
-    prisma.user.findMany({ orderBy: { createdAt: "asc" } }),
-    prisma.brandMaterial.findMany({ orderBy: [{ category: "asc" }, { createdAt: "desc" }], take: 50 }),
-    prisma.offerRecord.findMany({ orderBy: [{ type: "asc" }, { country: "asc" }, { createdAt: "desc" }] }),
+    showContent ? prisma.entry.findMany({ orderBy: { createdAt: "desc" }, take: 100 }) : Promise.resolve([]),
+    showUsers   ? prisma.user.findMany({ orderBy: { createdAt: "asc" } }) : Promise.resolve([]),
+    showContent ? prisma.brandMaterial.findMany({ orderBy: [{ category: "asc" }, { createdAt: "desc" }], take: 50 }) : Promise.resolve([]),
+    showOffers  ? prisma.offerRecord.findMany({ orderBy: [{ type: "asc" }, { country: "asc" }, { createdAt: "desc" }] }) : Promise.resolve([]),
   ]);
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar role={session.user.role} name={session.user.name} />
+      <Navbar role={session!.user.role} name={session!.user.name} />
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8 flex flex-col gap-10">
 
         {/* Entries */}
-        <section className="flex flex-col gap-4">
+        {showContent && <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-neutral-900">Entries</h2>
@@ -94,10 +100,10 @@ export default async function AdminPage() {
               <div className="py-16 text-center text-sm text-neutral-400">No entries yet</div>
             )}
           </div>
-        </section>
+        </section>}
 
         {/* Users */}
-        <section className="flex flex-col gap-4">
+        {showUsers && <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-neutral-900">Users</h2>
@@ -125,7 +131,7 @@ export default async function AdminPage() {
                     <td className="px-5 py-3.5 text-neutral-900">{user.email}</td>
                     <td className="px-5 py-3.5 text-neutral-600">{user.name ?? "—"}</td>
                     <td className="px-5 py-3.5">
-                      <Badge variant={user.role === "ADMIN" ? "blue" : "default"}>{user.role}</Badge>
+                      <Badge variant={user.role === "ADMIN" ? "blue" : "default"}>{ROLE_LABELS[user.role] ?? user.role}</Badge>
                     </td>
                     <td className="px-5 py-3.5">
                       <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${user.isActive ? "text-emerald-600" : "text-neutral-400"}`}>
@@ -144,10 +150,10 @@ export default async function AdminPage() {
               </tbody>
             </table>
           </div>
-        </section>
+        </section>}
 
         {/* Offers */}
-        <section id="offers" className="flex flex-col gap-4">
+        {showOffers && <section id="offers" className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-neutral-900">Offers</h2>
@@ -209,10 +215,10 @@ export default async function AdminPage() {
               <div className="py-10 text-center text-sm text-neutral-400">No offers yet — add the first one</div>
             )}
           </div>
-        </section>
+        </section>}
 
         {/* Brand Materials */}
-        <section className="flex flex-col gap-4">
+        {showContent && <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-neutral-900">Brand Materials</h2>
@@ -264,7 +270,7 @@ export default async function AdminPage() {
               <div className="py-10 text-center text-sm text-neutral-400">No brand materials yet</div>
             )}
           </div>
-        </section>
+        </section>}
 
       </main>
     </div>
