@@ -121,15 +121,35 @@ function CountryMultiselect({ value, onChange }: { value: string[]; onChange: (v
 // ─── Offer Cell ───────────────────────────────────────────────────────────────
 
 function OfferCell({ offer, onClick }: { offer: Offer; onClick: (o: Offer) => void }) {
+  const dateRange = [offer.dateFrom, offer.dateTo].filter(Boolean).join(' – ');
   return (
     <button
       onClick={() => onClick(offer)}
       className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group"
     >
-      <p className="text-xs font-medium text-neutral-800 group-hover:text-blue-700 leading-snug line-clamp-2">
-        {offer.offerName}
-      </p>
-      {(offer.price || offer.duration) && (
+      {/* Button texts */}
+      {offer.buttonTextEn ? (
+        <>
+          <p className="text-xs font-medium text-neutral-800 group-hover:text-blue-700 leading-snug line-clamp-2">
+            {offer.buttonTextEn}
+          </p>
+          {offer.buttonTextAr && (
+            <p className="text-[11px] text-neutral-500 mt-0.5 line-clamp-1 text-right" dir="rtl">
+              {offer.buttonTextAr}
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="text-xs font-medium text-neutral-800 group-hover:text-blue-700 leading-snug line-clamp-2">
+          {offer.offerName}
+        </p>
+      )}
+      {/* Date range */}
+      {dateRange && (
+        <p className="text-[11px] text-neutral-400 mt-1">{dateRange}</p>
+      )}
+      {/* Fallback: price · duration if no date range */}
+      {!dateRange && (offer.price || offer.duration) && (
         <p className="text-[11px] text-neutral-400 mt-0.5">
           {[offer.price, offer.duration].filter(Boolean).join(' · ')}
         </p>
@@ -268,6 +288,36 @@ function OfferDrawer({ offer, onClose }: { offer: Offer | null; onClose: () => v
                 </div>
               )}
 
+              {(offer.buttonTextEn || offer.buttonTextAr || offer.disclaimerEn || offer.disclaimerAr) && (
+                <div className="flex flex-col gap-3 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                  <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wide">Button Copy</span>
+                  {offer.buttonTextEn && (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Button Text (EN)</span>
+                      <span className="text-sm font-medium text-neutral-900">{offer.buttonTextEn}</span>
+                    </div>
+                  )}
+                  {offer.buttonTextAr && (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Button Text (AR)</span>
+                      <span className="text-sm font-medium text-neutral-900 text-right" dir="rtl">{offer.buttonTextAr}</span>
+                    </div>
+                  )}
+                  {offer.disclaimerEn && (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Under Button (EN)</span>
+                      <span className="text-sm text-neutral-700">{offer.disclaimerEn}</span>
+                    </div>
+                  )}
+                  {offer.disclaimerAr && (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Under Button (AR)</span>
+                      <span className="text-sm text-neutral-700 text-right" dir="rtl">{offer.disclaimerAr}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex flex-col gap-3.5">
                 <DetailRow label="Offer Value" value={offer.offerValue} />
                 <DetailRow label="Promo Code" value={offer.promoCode} />
@@ -344,10 +394,11 @@ function OffersTable({
           const byTariff = groupByTariff(dateOffers);
           return (
             <div key={date} className="flex flex-col gap-5">
-              <div className="flex items-center gap-3">
-                <Calendar size={14} className="text-neutral-400" />
-                <span className="text-sm font-semibold text-neutral-700">
-                  Planned change date: <span className="text-blue-600">{formatPlannedDate(date)}</span>
+              <div className="flex items-center gap-2.5 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl w-fit">
+                <Calendar size={14} className="text-blue-500 shrink-0" />
+                <span className="text-sm text-blue-700">
+                  Planned change date:{' '}
+                  <span className="font-bold text-blue-900">{formatPlannedDate(date)}</span>
                 </span>
               </div>
               <div className="flex flex-col gap-5">

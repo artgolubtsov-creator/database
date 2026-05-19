@@ -25,6 +25,10 @@ export type Offer = {
   comment?: string;
   status?: string;
   lastUpdated?: string;
+  buttonTextEn?: string;
+  buttonTextAr?: string;
+  disclaimerEn?: string;
+  disclaimerAr?: string;
 };
 
 export type Period = '7d' | '30d' | '90d' | 'custom';
