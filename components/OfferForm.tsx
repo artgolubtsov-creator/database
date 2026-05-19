@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 
 const schema = z.object({
   type:         z.enum(["future", "current", "old"]),
+  offerKind:    z.enum(["Main product", "Performance", "Trial", "Promo"]).optional(),
   country:      z.string().min(1, "Country is required"),
   tariff:       z.enum(["Basic", "Premium", "Crunchyroll"]),
   platform:     z.enum(["iOS", "Android", "Native"]),
@@ -33,11 +34,12 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-const TYPE_OPTIONS    = [{ value: "future", label: "Future" }, { value: "current", label: "Current" }, { value: "old", label: "Old" }];
-const TARIFF_OPTIONS  = [{ value: "Basic", label: "Basic" }, { value: "Premium", label: "Premium" }, { value: "Crunchyroll", label: "Crunchyroll" }];
+const TYPE_OPTIONS     = [{ value: "future", label: "Future" }, { value: "current", label: "Current" }, { value: "old", label: "Old" }];
+const TARIFF_OPTIONS   = [{ value: "Basic", label: "Basic" }, { value: "Premium", label: "Premium" }, { value: "Crunchyroll", label: "Crunchyroll" }];
 const PLATFORM_OPTIONS = [{ value: "iOS", label: "iOS" }, { value: "Android", label: "Android" }, { value: "Native", label: "Native" }];
-const COUNTRY_OPTIONS = ["UAE", "Egypt", "Kuwait", "Qatar", "Oman", "KSA", "Bahrain"].map(c => ({ value: c, label: c }));
-const STATUS_OPTIONS  = ["Planned", "Draft", "Active", "Expired"].map(s => ({ value: s, label: s }));
+const COUNTRY_OPTIONS  = ["UAE", "Egypt", "Kuwait", "Qatar", "Oman", "KSA", "Bahrain"].map(c => ({ value: c, label: c }));
+const STATUS_OPTIONS   = ["Planned", "Draft", "Active", "Expired"].map(s => ({ value: s, label: s }));
+const KIND_OPTIONS     = ["Main product", "Performance", "Trial", "Promo"].map(k => ({ value: k, label: k }));
 
 interface Props {
   mode: "create" | "edit";
@@ -93,10 +95,13 @@ export function OfferForm({ mode, offerId, initialValues }: Props) {
         <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wide">Main</h3>
         <div className="grid grid-cols-2 gap-4">
           <Select label="Type" options={TYPE_OPTIONS} {...register("type")} />
-          <Select label="Country" options={COUNTRY_OPTIONS} {...register("country")} error={errors.country?.message} />
+          <Select label="Kind" options={KIND_OPTIONS} placeholder="— select —" {...register("offerKind")} />
         </div>
         <div className="grid grid-cols-2 gap-4">
+          <Select label="Country" options={COUNTRY_OPTIONS} {...register("country")} error={errors.country?.message} />
           <Select label="Tariff" options={TARIFF_OPTIONS} {...register("tariff")} />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
           <Select label="Platform" options={PLATFORM_OPTIONS} {...register("platform")} />
         </div>
         <Input label="Offer Name" {...register("offerName")} error={errors.offerName?.message} placeholder="e.g. Summer Basic iOS UAE" />

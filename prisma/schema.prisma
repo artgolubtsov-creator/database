@@ -109,6 +109,7 @@ model Entry {
 model OfferRecord {
   id           String   @id @default(cuid())
   type         String   // future | current | old
+  offerKind    String?  // Main product | Performance | Trial | Promo
   date         String?  // planned change date (future offers only)
   country      String
   tariff       String   // Basic | Premium | Crunchyroll

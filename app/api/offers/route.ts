@@ -6,6 +6,7 @@ import { canManageOffers } from "@/lib/roles";
 
 const offerSchema = z.object({
   type:         z.enum(["future", "current", "old"]),
+  offerKind:    z.enum(["Main product", "Performance", "Trial", "Promo"]).optional().nullable(),
   date:         z.string().optional().nullable(),
   country:      z.string().min(1),
   tariff:       z.enum(["Basic", "Premium", "Crunchyroll"]),
@@ -32,17 +33,19 @@ export async function GET(req: NextRequest) {
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const type     = searchParams.get("type");
-  const country  = searchParams.get("country");
-  const tariff   = searchParams.get("tariff");
-  const platform = searchParams.get("platform");
+  const type      = searchParams.get("type");
+  const country   = searchParams.get("country");
+  const tariff    = searchParams.get("tariff");
+  const platform  = searchParams.get("platform");
+  const offerKind = searchParams.get("offerKind");
 
   const offers = await prisma.offerRecord.findMany({
     where: {
-      ...(type     ? { type }     : {}),
-      ...(country  ? { country }  : {}),
-      ...(tariff   ? { tariff }   : {}),
-      ...(platform ? { platform } : {}),
+      ...(type      ? { type }      : {}),
+      ...(country   ? { country }   : {}),
+      ...(tariff    ? { tariff }    : {}),
+      ...(platform  ? { platform }  : {}),
+      ...(offerKind ? { offerKind } : {}),
     },
     orderBy: [{ type: "asc" }, { country: "asc" }, { createdAt: "desc" }],
   });

@@ -1,14 +1,17 @@
 export type OfferType = 'future' | 'current' | 'old';
 export type Tariff = 'Basic' | 'Premium' | 'Crunchyroll';
 export type Platform = 'iOS' | 'Android' | 'Native';
+export type OfferKind = 'Main product' | 'Performance' | 'Trial' | 'Promo';
 
 export const COUNTRIES = ['UAE', 'Egypt', 'Kuwait', 'Qatar', 'Oman', 'KSA', 'Bahrain'] as const;
 export const TARIFFS: Tariff[] = ['Basic', 'Premium', 'Crunchyroll'];
 export const PLATFORMS: Platform[] = ['iOS', 'Android', 'Native'];
+export const OFFER_KINDS: OfferKind[] = ['Main product', 'Performance', 'Trial', 'Promo'];
 
 export type Offer = {
   id: string;
   type: OfferType;
+  offerKind?: OfferKind;
   date?: string;
   country: string;
   tariff: Tariff;
@@ -38,6 +41,7 @@ export type OfferFilters = {
   countries: string[];
   tariff: Tariff | 'All';
   platform: Platform | 'All';
+  offerKind: OfferKind | 'All';
   period: Period;
   periodFrom?: string;
   periodTo?: string;
@@ -48,5 +52,6 @@ export const DEFAULT_FILTERS: OfferFilters = {
   countries: [],
   tariff: 'All',
   platform: 'All',
+  offerKind: 'All',
   period: '30d',
 };

@@ -6,6 +6,7 @@ import { canManageOffers } from "@/lib/roles";
 
 const patchSchema = z.object({
   type:         z.enum(["future", "current", "old"]).optional(),
+  offerKind:    z.enum(["Main product", "Performance", "Trial", "Promo"]).optional().nullable(),
   date:         z.string().optional().nullable(),
   country:      z.string().min(1).optional(),
   tariff:       z.enum(["Basic", "Premium", "Crunchyroll"]).optional(),

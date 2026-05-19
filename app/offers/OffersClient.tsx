@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronDown, Check, Calendar, Copy, Check as CheckIcon } from "lucide-react";
-import type { Offer, OfferFilters, Tariff, Platform, Period } from "@/lib/offers/types";
-import { COUNTRIES, TARIFFS, PLATFORMS, DEFAULT_FILTERS } from "@/lib/offers/types";
+import type { Offer, OfferFilters, Tariff, Platform, Period, OfferKind } from "@/lib/offers/types";
+import { COUNTRIES, TARIFFS, PLATFORMS, OFFER_KINDS, DEFAULT_FILTERS } from "@/lib/offers/types";
 import { futureOffersAdapter, currentOffersAdapter, oldOffersAdapter } from "@/lib/offers/adapters";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -137,12 +137,20 @@ function CopyCell({ text, rtl }: { text?: string | null; rtl?: boolean }) {
 
 // ─── Tariff Table ─────────────────────────────────────────────────────────────
 
+const KIND_COLORS: Record<OfferKind, string> = {
+  'Main product': 'bg-blue-50 text-blue-600',
+  'Performance':  'bg-violet-50 text-violet-600',
+  'Trial':        'bg-emerald-50 text-emerald-600',
+  'Promo':        'bg-amber-50 text-amber-600',
+};
+
 function TariffTable({
-  tariff, offers, platformFilter, activeCountries, onSelectOffer,
+  tariff, offers, platformFilter, kindFilter, activeCountries, onSelectOffer,
 }: {
   tariff: Tariff;
   offers: Offer[];
   platformFilter: Platform | 'All';
+  kindFilter: OfferKind | 'All';
   activeCountries: string[];
   onSelectOffer: (o: Offer) => void;
 }) {
@@ -150,6 +158,7 @@ function TariffTable({
     .filter(o => {
       if (activeCountries.length > 0 && !activeCountries.includes(o.country)) return false;
       if (platformFilter !== 'All' && o.platform !== platformFilter) return false;
+      if (kindFilter !== 'All' && o.offerKind !== kindFilter) return false;
       return true;
     })
     .sort((a, b) => a.country.localeCompare(b.country) || a.platform.localeCompare(b.platform));
@@ -183,11 +192,18 @@ function TariffTable({
                   </td>
                   <td className="px-4 py-3 align-top">
                     <button onClick={() => onSelectOffer(offer)} className="text-left group">
-                      <span className="block text-xs font-semibold text-neutral-800 group-hover:text-blue-700 transition-colors leading-snug">
-                        {offer.offerName}
-                      </span>
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className="text-xs font-semibold text-neutral-800 group-hover:text-blue-700 transition-colors leading-snug">
+                          {offer.offerName}
+                        </span>
+                        {offer.offerKind && (
+                          <span className={`shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded ${KIND_COLORS[offer.offerKind] ?? 'bg-neutral-100 text-neutral-500'}`}>
+                            {offer.offerKind}
+                          </span>
+                        )}
+                      </div>
                       {(offer.offerValue || offer.price) && (
-                        <span className="block text-[11px] text-neutral-400 mt-0.5">
+                        <span className="block text-[11px] text-neutral-400">
                           {offer.offerValue || [offer.price, offer.duration].filter(Boolean).join(' · ')}
                         </span>
                       )}
@@ -261,10 +277,15 @@ function OfferDrawer({ offer, onClose }: { offer: Offer | null; onClose: () => v
             {/* Header */}
             <div className="flex items-start justify-between gap-3 px-6 py-5 border-b border-neutral-100">
               <div>
-                <div className="flex gap-2 mb-1.5">
+                <div className="flex flex-wrap gap-2 mb-1.5">
                   <span className="text-xs px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 font-medium">{offer.tariff}</span>
                   <span className="text-xs px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 font-medium">{offer.platform}</span>
                   <span className="text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 font-medium">{offer.country}</span>
+                  {offer.offerKind && (
+                    <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${KIND_COLORS[offer.offerKind] ?? 'bg-neutral-100 text-neutral-500'}`}>
+                      {offer.offerKind}
+                    </span>
+                  )}
                 </div>
                 <h2 className="text-base font-bold text-neutral-900 leading-snug">{offer.offerName}</h2>
               </div>
@@ -412,6 +433,7 @@ function OffersTable({
                     tariff={tariff}
                     offers={tariffOffers}
                     platformFilter={filters.platform}
+                    kindFilter={filters.offerKind}
                     activeCountries={activeCountries}
                     onSelectOffer={onSelectOffer}
                   />
@@ -433,6 +455,7 @@ function OffersTable({
           tariff={tariff}
           offers={tariffOffers}
           platformFilter={filters.platform}
+          kindFilter={filters.offerKind}
           activeCountries={activeCountries}
           onSelectOffer={onSelectOffer}
         />
@@ -526,6 +549,14 @@ export function OffersClient() {
           >
             <option value="All">All platforms</option>
             {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+          <select
+            value={filters.offerKind}
+            onChange={e => updateFilters({ offerKind: e.target.value as OfferKind | 'All' })}
+            className={selectClass}
+          >
+            <option value="All">All kinds</option>
+            {OFFER_KINDS.map(k => <option key={k} value={k}>{k}</option>)}
           </select>
 
           {/* Period filter — only for old offers */}
