@@ -10,6 +10,7 @@ import { Plus, Pencil, Trash2, ExternalLink, Upload } from "lucide-react";
 import { DeleteEntryButton } from "./DeleteEntryButton";
 import { DeleteOfferButton } from "./DeleteOfferButton";
 import { canManageContent, canManageUsers, canManageOffers, ROLE_LABELS } from "@/lib/roles";
+import { CollapsibleSection } from "./CollapsibleSection";
 
 const CATEGORY_LABEL: Record<string, string> = {
   GUIDE: "Guide",
@@ -40,21 +41,19 @@ export default async function AdminPage() {
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8 flex flex-col gap-10">
 
         {/* Entries */}
-        {showContent && <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-neutral-900">Entries</h2>
-              <p className="text-sm text-neutral-500 mt-0.5">{entries.length} total</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link href="/admin/entries/import">
-                <Button size="sm" variant="ghost"><Upload size={15} /> Import</Button>
-              </Link>
-              <Link href="/admin/entries/new">
-                <Button size="sm"><Plus size={15} /> New Entry</Button>
-              </Link>
-            </div>
-          </div>
+        {showContent && <CollapsibleSection
+          storageKey="entries"
+          title="Entries"
+          count={`${entries.length} total`}
+          actions={<>
+            <Link href="/admin/entries/import">
+              <Button size="sm" variant="ghost"><Upload size={15} /> Import</Button>
+            </Link>
+            <Link href="/admin/entries/new">
+              <Button size="sm"><Plus size={15} /> New Entry</Button>
+            </Link>
+          </>}
+        >
 
           <div className="bg-white rounded-2xl card-shadow overflow-hidden">
             <table className="w-full text-sm">
@@ -100,19 +99,15 @@ export default async function AdminPage() {
               <div className="py-16 text-center text-sm text-neutral-400">No entries yet</div>
             )}
           </div>
-        </section>}
+        </CollapsibleSection>}
 
         {/* Users */}
-        {showUsers && <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-neutral-900">Users</h2>
-              <p className="text-sm text-neutral-500 mt-0.5">{users.length} accounts</p>
-            </div>
-            <Link href="/admin/users/new">
-              <Button size="sm"><Plus size={15} /> New User</Button>
-            </Link>
-          </div>
+        {showUsers && <CollapsibleSection
+          storageKey="users"
+          title="Users"
+          count={`${users.length} accounts`}
+          actions={<Link href="/admin/users/new"><Button size="sm"><Plus size={15} /> New User</Button></Link>}
+        >
           <div className="bg-white rounded-2xl card-shadow overflow-hidden">
             <table className="w-full text-sm">
               <thead>
@@ -150,19 +145,15 @@ export default async function AdminPage() {
               </tbody>
             </table>
           </div>
-        </section>}
+        </CollapsibleSection>}
 
         {/* Offers */}
-        {showOffers && <section id="offers" className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-neutral-900">Offers</h2>
-              <p className="text-sm text-neutral-500 mt-0.5">{offerRecords.length} records</p>
-            </div>
-            <Link href="/admin/offers/new">
-              <Button size="sm"><Plus size={15} /> New Offer</Button>
-            </Link>
-          </div>
+        {showOffers && <CollapsibleSection
+          storageKey="offers"
+          title="Offers"
+          count={`${offerRecords.length} records`}
+          actions={<Link href="/admin/offers/new"><Button size="sm"><Plus size={15} /> New Offer</Button></Link>}
+        >
           <div className="bg-white rounded-2xl card-shadow overflow-hidden">
             <table className="w-full text-sm">
               <thead>
@@ -215,19 +206,15 @@ export default async function AdminPage() {
               <div className="py-10 text-center text-sm text-neutral-400">No offers yet — add the first one</div>
             )}
           </div>
-        </section>}
+        </CollapsibleSection>}
 
         {/* Brand Materials */}
-        {showContent && <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-neutral-900">Brand Materials</h2>
-              <p className="text-sm text-neutral-500 mt-0.5">{brandMaterials.length} items</p>
-            </div>
-            <Link href="/admin/brand-materials/new">
-              <Button size="sm"><Plus size={15} /> New Material</Button>
-            </Link>
-          </div>
+        {showContent && <CollapsibleSection
+          storageKey="brand-materials"
+          title="Brand Materials"
+          count={`${brandMaterials.length} items`}
+          actions={<Link href="/admin/brand-materials/new"><Button size="sm"><Plus size={15} /> New Material</Button></Link>}
+        >
           <div className="bg-white rounded-2xl card-shadow overflow-hidden">
             <table className="w-full text-sm">
               <thead>
@@ -270,7 +257,7 @@ export default async function AdminPage() {
               <div className="py-10 text-center text-sm text-neutral-400">No brand materials yet</div>
             )}
           </div>
-        </section>}
+        </CollapsibleSection>}
 
       </main>
     </div>
