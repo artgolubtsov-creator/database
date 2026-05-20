@@ -2,19 +2,46 @@
 
 Internal CMS for managing content titles, brand materials, and subscription offers for the Yango Play streaming platform.
 
-**Production:** https://yangoplay.pro
+**Production:** https://www.yangoplay.pro
 
 ---
 
 ## Features
 
-- **Dashboard** — full catalogue of content titles with sorting by year, material statuses, and quick links
-- **Entry cards** — per-title pages with metadata, Arabic copy, material statuses (poster, trailer, teaser, episodes), and asset links
-- **Public share links** — generate a read-only link per title to share with external teams without login
-- **Brand materials** — library of guides, logos, presentations, and active offers
-- **Offers** — subscription offers table grouped by tariff (Basic / Premium / Crunchyroll) and country × platform matrix, with future / current / old views
-- **Admin panel** — user management (create, activate/deactivate, change roles)
-- **Role-based access** — `ADMIN`, `EDITOR`, `VIEWER`
+### Content
+- **Dashboard** — full catalogue of titles with search, filters (type, country, genre, date), pagination, and material status indicators
+- **Entry cards** — per-title detail page with metadata, Arabic copy, material statuses (poster, trailer, teaser, episodes), and asset links
+- **Public share links** — read-only link per title for external teams, no login required
+- **Sync Figma & Source** — one-click sync of `figmaLink` and `sourceLink` from a Google Sheet (Graphics tab) matched by `mena_id → titleId`
+
+### Offers
+- **Offers page** — subscription offers filtered by country, platform, kind, and date range; Future / Current / Old views
+- **Offer kinds** — Main product / Performance / Test product classification
+- **Import from Sheet** — parse any tab from the offers Google Sheet, preview country rows with EN + AR button text and disclaimers, then bulk-import as offer records
+- **Admin CRUD** — create, edit, delete individual offer records
+
+### Brand Materials
+- Library of guides, logos, presentations, and active offer documents
+
+### Admin
+- **Users** — create accounts, set roles, activate/deactivate
+- **Collapsible sections** — each admin section collapses and remembers its state in `localStorage`
+
+### Other
+- **Instructions page** — step-by-step guide for importing offers from Google Sheets (visible to ADMIN and OFFER_MANAGER)
+- **Role-based access** — five roles with granular permissions
+
+---
+
+## Roles
+
+| Role | Content | Offers | Users |
+|---|---|---|---|
+| `ADMIN` | ✓ | ✓ | ✓ |
+| `SUPER_EDITOR` | ✓ | ✓ | — |
+| `CONTENT_EDITOR` | ✓ | — | — |
+| `OFFER_MANAGER` | — | ✓ | — |
+| `VIEWER` | read-only | read-only | — |
 
 ---
 
@@ -26,9 +53,10 @@ Internal CMS for managing content titles, brand materials, and subscription offe
 | Auth | NextAuth v5 (credentials + JWT) |
 | Database | PostgreSQL via Supabase |
 | ORM | Prisma 5 |
-| Styling | Tailwind CSS |
+| Styling | Tailwind CSS v4 |
 | Animations | Framer Motion |
 | Validation | Zod v4 |
+| Google Integration | googleapis + xlsx |
 | Deployment | Vercel |
 
 ---
@@ -36,19 +64,12 @@ Internal CMS for managing content titles, brand materials, and subscription offe
 ## Local Development
 
 ```bash
-# Install dependencies
 npm install
+cp .env.example .env   # fill in values
 
-# Copy env file and fill in values
-cp .env.example .env
-
-# Generate Prisma client
 npx prisma generate
-
-# Run migrations
 npx prisma migrate deploy
 
-# Start dev server
 npm run dev
 ```
 
@@ -59,82 +80,70 @@ App runs at http://localhost:3000.
 ## Environment Variables
 
 ```env
-# PostgreSQL connection via pgbouncer (pooled, for runtime queries)
+# PostgreSQL — pooled connection (runtime)
 DATABASE_URL=postgresql://...?pgbouncer=true&connection_limit=1
 
-# Direct connection (for migrations)
+# PostgreSQL — direct connection (migrations only)
 DIRECT_URL=postgresql://...
 
 # NextAuth
-AUTH_SECRET=your-secret-here
-NEXTAUTH_URL=http://localhost:3000
+AUTH_SECRET=
+AUTH_URL=http://localhost:3000
+
+# Seed
+SEED_ADMIN_EMAIL=
+SEED_ADMIN_PASSWORD=
+
+# Google Service Account (for Sheet parsers)
+GOOGLE_SERVICE_ACCOUNT_EMAIL=
+GOOGLE_PRIVATE_KEY=
+
+# Offers Google Sheet ID
+GOOGLE_SHEET_ID=
 ```
 
----
-
-## Creating Users
-
-Users are created via a script (there is no registration UI):
-
-```bash
-npx ts-node -e "
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
-const db = new PrismaClient();
-db.user.create({
-  data: {
-    email: 'user@example.com',
-    name: 'Name',
-    passwordHash: bcrypt.hashSync('password', 10),
-    role: 'EDITOR', // ADMIN | EDITOR | VIEWER
-  }
-}).then(u => console.log('Created:', u.email)).finally(() => db.$disconnect());
-"
-```
-
-Or use the ready-made script:
-
-```bash
-npx ts-node prisma/create-user.ts
-```
+> **Note:** Migrations require a direct Supabase connection (port 5432). Run `npx prisma migrate deploy` locally — never from the Vercel build pipeline, as port 5432 is blocked there.
 
 ---
 
 ## Database Migrations
 
 ```bash
-# Create and apply a new migration
+# Create migration during development
 npx prisma migrate dev --name description
 
-# Apply existing migrations (production / CI)
+# Apply to production (run locally, not in CI)
 npx prisma migrate deploy
 
 # Open Prisma Studio
-npx prisma studio
+npm run db:studio
 ```
 
 ---
 
-## Data Import
+## Google Sheets Integration
 
-To bulk-update `figmaLink` / `sourceLink` from a CSV export:
+Two parsers are built in:
 
-```bash
-npx ts-node prisma/update-from-sheets.ts /path/to/file.csv
-```
+### 1. Import from Sheet (Offers)
+Reads any tab from the offers spreadsheet (`GOOGLE_SHEET_ID`). Expected tab structure:
 
-CSV format expected: `mena_id`, `figma_link`, `source_link` columns.
+| Row | Content |
+|---|---|
+| 1 | `"" · "Date from:" · value` |
+| 2 | `"" · "Date to:" · value` |
+| 4 | Platform description |
+| 5 | Header: `"" · "" · "Eng" · "Arabic"` |
+| 6+ | `"Button text" · Country · EN · AR` then `"Text under the button" · "" · EN · AR` |
 
----
+Access via **Admin → Offers → Import from Sheet**.
 
-## Offers Page
+### 2. Sync Figma & Source (Entries)
+Reads the `Graphics` tab of the content management spreadsheet. Matches `mena_id` (col F) to `titleId` in DB, updates `figmaLink` (col R) and `sourceLink` (col U).
 
-Offers are currently powered by mock data in `lib/offers/mock-data.ts`. Adapters in `lib/offers/adapters.ts` are stubbed with `TODO` comments marking where to plug in real API calls:
+Access via **Admin → Entries → Sync Figma & Source**.
 
-- **Future offers** → Google Sheets API
-- **Current / Old offers** → DataLens API
-
-Each offer supports EN and AR button copy fields (`buttonTextEn`, `buttonTextAr`, `disclaimerEn`, `disclaimerAr`).
+Both parsers use a Google service account with `drive.readonly` / `spreadsheets.readonly` scope.
 
 ---
 
@@ -142,25 +151,44 @@ Each offer supports EN and AR button copy fields (`buttonTextEn`, `buttonTextAr`
 
 ```
 app/
-  dashboard/        # Content catalogue
-  entries/[id]/     # Entry detail page
-  share/[token]/    # Public read-only share page (no auth)
-  brand-materials/  # Brand asset library
-  offers/           # Subscription offers
-  admin/            # User management + entry editing
-  api/              # REST API routes
+  dashboard/          # Content catalogue
+  entries/[id]/       # Entry detail page
+  share/[token]/      # Public share (no auth)
+  brand-materials/    # Brand asset library
+  offers/             # Subscription offers view
+  instructions/       # Usage guide for offer managers
+  admin/
+    entries/          # Entry CRUD
+    offers/           # Offer CRUD
+    users/            # User management
+    brand-materials/  # Brand material CRUD
+    sheet-import/     # Offer sheet import UI
+    figma-sync/       # Figma & Source sync UI
+  api/
+    offers/           # Offer CRUD endpoints
+    admin/
+      sheet-import/   # Sheet parse + bulk create offers
+      figma-sync/     # Figma/Source sync from Graphics sheet
 
-components/         # Shared UI components
+components/           # Shared UI (Button, Badge, Select, Navbar, …)
 lib/
-  offers/           # Offer types, mock data, adapters
+  offers/             # Types, adapters, sheet parser
+  entries/            # Figma sync logic
+  roles.ts            # Role permission helpers
 prisma/
-  schema.prisma     # DB schema
-  migrations/       # SQL migrations
-  *.ts              # Utility scripts (import, seed, create-user)
+  schema.prisma
+  migrations/
+  seed.ts
 ```
 
 ---
 
 ## Deployment
 
-Pushes to `main` deploy automatically via Vercel. Environment variables are set in the Vercel project dashboard.
+Deploy manually via Vercel CLI:
+
+```bash
+vercel deploy --prod
+```
+
+All environment variables are managed in the Vercel project dashboard under the **Production** environment.
