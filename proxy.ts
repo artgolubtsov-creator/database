@@ -8,8 +8,9 @@ export default auth((req) => {
   const role = session?.user?.role;
   const path = nextUrl.pathname;
 
-  // Public share links — no auth required
+  // Public links — no auth required
   if (path.startsWith("/share/")) return NextResponse.next();
+  if (path.startsWith("/portal/")) return NextResponse.next();
 
   // Unauthenticated → login
   if (!isLoggedIn && !path.startsWith("/login") && !path.startsWith("/api/auth")) {
@@ -21,10 +22,7 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/dashboard", nextUrl));
   }
 
-  // Root → dashboard or login
-  if (path === "/") {
-    return NextResponse.redirect(new URL(isLoggedIn ? "/dashboard" : "/login", nextUrl));
-  }
+  // Root — show brand selector (page.tsx handles auth itself)
 
   // User management — ADMIN only
   if (path.startsWith("/admin/users") && !canManageUsers(role)) {
