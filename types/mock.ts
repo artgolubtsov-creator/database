@@ -2,7 +2,7 @@ export type BrandSlug = 'yango-play' | 'yasmina' | 'yango-music' | 'yango-plus'
 export type AssetFormat = 'IMAGE' | 'VIDEO' | 'PDF' | 'TEMPLATE'
 export type AssetStatus = 'APPROVED' | 'REVIEW' | 'DRAFT' | 'ARCHIVED'
 export type CollectionAccess = 'INTERNAL' | 'EXTERNAL'
-export type DemoRole = 'Admin' | 'Brand Manager' | 'Internal Viewer' | 'External Agency'
+export type DemoRole = 'Admin' | 'Менеджер офферов' | 'Внутренний заказчик' | 'Внешний подрядчик'
 
 export interface MockAsset {
   id: string

@@ -40,17 +40,17 @@ export function useDemoRole() {
 }
 
 export function canUpload(role: DemoRole) {
-  return role === "Admin" || role === "Brand Manager"
+  return role === "Admin" || role === "Менеджер офферов"
 }
 export function canApprove(role: DemoRole) {
-  return role === "Admin" || role === "Brand Manager"
+  return role === "Admin" || role === "Менеджер офферов"
 }
 export function canCreateCollection(role: DemoRole) {
-  return role === "Admin" || role === "Brand Manager"
+  return role === "Admin" || role === "Менеджер офферов"
 }
 export function canSharePortal(role: DemoRole) {
-  return role === "Admin" || role === "Brand Manager"
+  return role === "Admin" || role === "Менеджер офферов"
 }
 export function isExternalOnly(role: DemoRole) {
-  return role === "External Agency"
+  return role === "Внешний подрядчик"
 }

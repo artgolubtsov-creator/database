@@ -31,7 +31,7 @@ export function AppSidebar({ userName, userRole }: AppSidebarProps) {
   }, [pathname, activeBrandSlug])
 
   const topLinks = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard", label: "Database", icon: LayoutDashboard },
     { href: "/offers", label: "Offers", icon: Tag },
     { href: "/crm-maker", label: "CRM Maker", icon: Wand2 },
   ]
@@ -85,18 +85,35 @@ export function AppSidebar({ userName, userRole }: AppSidebarProps) {
         <div className="h-px bg-neutral-100 my-2" />
 
         {/* Brand section */}
-        <button
-          onClick={() => setBrandsOpen((o) => !o)}
-          className={cn(
-            "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors w-full text-left",
-            pathname === "/brands" || activeBrandSlug
-              ? "text-neutral-900 font-medium"
-              : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
-          )}
-        >
-          {brandsOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
-          Brand
-        </button>
+        <div className={cn(
+          "flex items-center rounded-lg text-sm transition-colors",
+          pathname === "/brands" || activeBrandSlug
+            ? "text-neutral-900 font-medium"
+            : "text-neutral-500 hover:text-neutral-900"
+        )}>
+          <Link
+            href="/brands"
+            className={cn(
+              "flex-1 px-3 py-2 rounded-l-lg transition-colors",
+              pathname === "/brands" || activeBrandSlug
+                ? "text-neutral-900 font-medium hover:bg-neutral-100"
+                : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
+            )}
+          >
+            Brand
+          </Link>
+          <button
+            onClick={() => setBrandsOpen((o) => !o)}
+            className={cn(
+              "px-2 py-2 rounded-r-lg transition-colors",
+              pathname === "/brands" || activeBrandSlug
+                ? "text-neutral-900 hover:bg-neutral-100"
+                : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
+            )}
+          >
+            {brandsOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+          </button>
+        </div>
 
         {brandsOpen && (
           <div className="pl-3 flex flex-col gap-1">

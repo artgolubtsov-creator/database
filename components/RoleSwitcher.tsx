@@ -2,13 +2,13 @@
 import { useDemoRole } from "@/lib/demo-role-context"
 import type { DemoRole } from "@/types/mock"
 
-const ROLES: DemoRole[] = ["Admin", "Brand Manager", "Internal Viewer", "External Agency"]
+const ROLES: DemoRole[] = ["Admin", "Менеджер офферов", "Внутренний заказчик", "Внешний подрядчик"]
 
 const ROLE_COLORS: Record<DemoRole, string> = {
   "Admin": "bg-neutral-900 text-white",
-  "Brand Manager": "bg-violet-600 text-white",
-  "Internal Viewer": "bg-sky-600 text-white",
-  "External Agency": "bg-amber-500 text-white",
+  "Менеджер офферов": "bg-violet-600 text-white",
+  "Внутренний заказчик": "bg-sky-600 text-white",
+  "Внешний подрядчик": "bg-amber-500 text-white",
 }
 
 export function RoleSwitcher() {
@@ -16,7 +16,7 @@ export function RoleSwitcher() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
-      <div className="flex flex-col gap-1 bg-white rounded-2xl shadow-lg border border-neutral-200 p-2 w-44">
+      <div className="flex flex-col gap-1 bg-white rounded-2xl shadow-lg border border-neutral-200 p-2 w-52">
         <p className="text-[10px] font-medium text-neutral-400 uppercase tracking-wider px-2 py-1">Demo Role</p>
         {ROLES.map((role) => (
           <button
