@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
@@ -36,9 +35,7 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar role={session!.user.role} name={session!.user.name} />
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8 flex flex-col gap-10">
+    <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8 flex flex-col gap-10">
 
         {/* Entries */}
         {showContent && <CollapsibleSection
@@ -46,6 +43,9 @@ export default async function AdminPage() {
           title="Entries"
           count={`${entries.length} total`}
           actions={<>
+            <Link href="/admin/figma-sync">
+              <Button size="sm" variant="ghost"><Upload size={15} /> Sync Figma & Source</Button>
+            </Link>
             <Link href="/admin/entries/import">
               <Button size="sm" variant="ghost"><Upload size={15} /> Import</Button>
             </Link>
@@ -152,7 +152,12 @@ export default async function AdminPage() {
           storageKey="offers"
           title="Offers"
           count={`${offerRecords.length} records`}
-          actions={<Link href="/admin/offers/new"><Button size="sm"><Plus size={15} /> New Offer</Button></Link>}
+          actions={<>
+            <Link href="/admin/sheet-import">
+              <Button size="sm" variant="ghost"><Upload size={15} /> Import from Sheet</Button>
+            </Link>
+            <Link href="/admin/offers/new"><Button size="sm"><Plus size={15} /> New Offer</Button></Link>
+          </>}
         >
           <div className="bg-white rounded-2xl card-shadow overflow-hidden">
             <table className="w-full text-sm">
@@ -260,6 +265,5 @@ export default async function AdminPage() {
         </CollapsibleSection>}
 
       </main>
-    </div>
   );
 }

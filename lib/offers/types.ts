@@ -1,17 +1,26 @@
 export type OfferType = 'future' | 'current' | 'old';
 export type Tariff = 'Basic' | 'Premium' | 'Crunchyroll';
 export type Platform = 'iOS' | 'Android' | 'Native';
-export type OfferKind = 'Main product' | 'Performance' | 'Test product';
+export type OfferKind = 'Music' | 'Play' | 'Taxi' | 'Yasmina' | 'Plus' | 'Other';
+export type BillingPeriod = 'Monthly' | 'Yearly';
 
-export const COUNTRIES = ['UAE', 'Egypt', 'Kuwait', 'Qatar', 'Oman', 'KSA', 'Bahrain'] as const;
+export const COUNTRIES = ['UAE', 'Egypt', 'Kuwait', 'Qatar', 'Oman', 'Bahrain', 'Iraq'] as const;
 export const TARIFFS: Tariff[] = ['Basic', 'Premium', 'Crunchyroll'];
 export const PLATFORMS: Platform[] = ['iOS', 'Android', 'Native'];
-export const OFFER_KINDS: OfferKind[] = ['Main product', 'Performance', 'Test product'];
+export const OFFER_KINDS: OfferKind[] = ['Music', 'Play', 'Taxi', 'Yasmina', 'Plus', 'Other'];
+export const BILLING_PERIODS: BillingPeriod[] = ['Monthly', 'Yearly'];
+
+export const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+export const YEARS = [2024, 2025, 2026, 2027];
 
 export type Offer = {
   id: string;
   type: OfferType;
   offerKind?: OfferKind;
+  billingPeriod?: BillingPeriod;
   date?: string;
   country: string;
   tariff: Tariff;
@@ -22,7 +31,7 @@ export type Offer = {
   duration?: string;
   promoCode?: string;
   description?: string;
-  source: 'Google Sheet' | 'DataLens';
+  source: 'Google Sheet' | 'DataLens' | 'Manual';
   dateFrom?: string;
   dateTo?: string;
   comment?: string;
@@ -42,6 +51,9 @@ export type OfferFilters = {
   tariff: Tariff | 'All';
   platform: Platform | 'All';
   offerKind: OfferKind | 'All';
+  billingPeriod: BillingPeriod | 'All';
+  month: number | 'All';
+  year: number | 'All';
   period: Period;
   periodFrom?: string;
   periodTo?: string;
@@ -53,5 +65,8 @@ export const DEFAULT_FILTERS: OfferFilters = {
   tariff: 'All',
   platform: 'All',
   offerKind: 'All',
+  billingPeriod: 'All',
+  month: 'All',
+  year: 'All',
   period: '30d',
 };

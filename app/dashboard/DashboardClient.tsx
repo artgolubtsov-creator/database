@@ -2,7 +2,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useCallback, useTransition, useState } from "react";
 import { Select } from "@/components/ui/Select";
-import { Search, SlidersHorizontal, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronUp, ChevronLeft, ChevronRight, Link2, HardDrive } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -251,6 +251,32 @@ export function DashboardClient({
                       <Link href={`/entries/${entry.id}`} className="font-medium text-neutral-900 hover:text-neutral-600 truncate block transition-colors">
                         {entry.titleName}
                       </Link>
+                      {(entry.figmaLink || entry.sourceLink) && (
+                        <div className="flex items-center gap-2 mt-1">
+                          {entry.figmaLink && (
+                            <a
+                              href={entry.figmaLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 text-[10px] text-violet-600 hover:text-violet-800 transition-colors"
+                            >
+                              <Link2 size={10} /> Figma
+                            </a>
+                          )}
+                          {entry.sourceLink && (
+                            <a
+                              href={entry.sourceLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-800 transition-colors"
+                            >
+                              <HardDrive size={10} /> Source
+                            </a>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td className="px-5 py-3 text-neutral-500 max-w-[200px] truncate hidden md:table-cell" dir="rtl">
                       {entry.arabicTitle ?? <span className="text-neutral-300" dir="ltr">—</span>}

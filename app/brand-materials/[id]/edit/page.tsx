@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
-import { Navbar } from "@/components/Navbar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { BrandMaterialForm } from "@/components/BrandMaterialForm";
 import { canManageContent } from "@/lib/roles";
@@ -16,9 +15,7 @@ export default async function EditBrandMaterialPublicPage({ params }: { params: 
   if (!material) notFound();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar role={session!.user.role} name={session!.user.name} />
-      <main className="flex-1 max-w-xl mx-auto w-full px-6 py-8">
+    <main className="flex-1 max-w-xl mx-auto w-full px-6 py-8">
         <div className="flex flex-col gap-6">
           <Breadcrumbs items={[
             { label: "Brand Materials", href: "/brand-materials" },
@@ -45,6 +42,5 @@ export default async function EditBrandMaterialPublicPage({ params }: { params: 
           </div>
         </div>
       </main>
-    </div>
   );
 }

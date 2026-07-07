@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import { redirect, notFound } from "next/navigation";
-import { Navbar } from "@/components/Navbar";
 import { OfferForm } from "@/components/OfferForm";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
@@ -18,9 +17,7 @@ export default async function EditOfferPage({ params }: { params: Promise<{ id: 
   if (!offer) notFound();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar role={session!.user.role} name={session!.user.name} />
-      <main className="flex-1 max-w-2xl mx-auto w-full px-6 py-8">
+    <main className="flex-1 max-w-2xl mx-auto w-full px-6 py-8">
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-3">
             <Link href="/admin#offers">
@@ -60,6 +57,5 @@ export default async function EditOfferPage({ params }: { params: Promise<{ id: 
           </div>
         </div>
       </main>
-    </div>
   );
 }

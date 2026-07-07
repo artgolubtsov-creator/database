@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronDown, Check, Calendar, Copy, Check as CheckIcon } from "lucide-react";
-import type { Offer, OfferFilters, Tariff, Platform, Period, OfferKind } from "@/lib/offers/types";
-import { COUNTRIES, TARIFFS, PLATFORMS, OFFER_KINDS, DEFAULT_FILTERS } from "@/lib/offers/types";
+import { X, ChevronDown, Check, Calendar, Copy, Check as CheckIcon, LayoutList, GanttChartSquare } from "lucide-react";
+import type { Offer, OfferFilters, Tariff, Platform, Period, OfferKind, BillingPeriod } from "@/lib/offers/types";
+import { COUNTRIES, TARIFFS, PLATFORMS, OFFER_KINDS, BILLING_PERIODS, MONTHS, YEARS, DEFAULT_FILTERS } from "@/lib/offers/types";
 import { futureOffersAdapter, currentOffersAdapter, oldOffersAdapter } from "@/lib/offers/adapters";
+import { GanttView, KIND_COLORS } from "./GanttView";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -28,7 +29,6 @@ function groupByTariff(offers: Offer[]): Map<Tariff, Offer[]> {
   return map;
 }
 
-
 function formatDate(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -41,7 +41,7 @@ function formatPlannedDate(iso: string): string {
   } catch { return iso; }
 }
 
-// ─── Multiselect ─────────────────────────────────────────────────────────────
+// ─── Country Multiselect ─────────────────────────────────────────────────────
 
 function CountryMultiselect({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const [open, setOpen] = useState(false);
@@ -137,19 +137,14 @@ function CopyCell({ text, rtl }: { text?: string | null; rtl?: boolean }) {
 
 // ─── Tariff Table ─────────────────────────────────────────────────────────────
 
-const KIND_COLORS: Record<OfferKind, string> = {
-  'Main product': 'bg-blue-50 text-blue-600',
-  'Performance':  'bg-violet-50 text-violet-600',
-  'Test product': 'bg-amber-50 text-amber-600',
-};
-
 function TariffTable({
-  tariff, offers, platformFilter, kindFilter, activeCountries, onSelectOffer,
+  tariff, offers, platformFilter, kindFilter, billingPeriodFilter, activeCountries, onSelectOffer,
 }: {
   tariff: Tariff;
   offers: Offer[];
   platformFilter: Platform | 'All';
   kindFilter: OfferKind | 'All';
+  billingPeriodFilter: BillingPeriod | 'All';
   activeCountries: string[];
   onSelectOffer: (o: Offer) => void;
 }) {
@@ -158,6 +153,7 @@ function TariffTable({
       if (activeCountries.length > 0 && !activeCountries.includes(o.country)) return false;
       if (platformFilter !== 'All' && o.platform !== platformFilter) return false;
       if (kindFilter !== 'All' && o.offerKind !== kindFilter) return false;
+      if (billingPeriodFilter !== 'All' && o.billingPeriod !== billingPeriodFilter) return false;
       return true;
     })
     .sort((a, b) => a.country.localeCompare(b.country) || a.platform.localeCompare(b.platform));
@@ -183,6 +179,7 @@ function TariffTable({
           <tbody>
             {rows.map((offer, i) => {
               const dateRange = [offer.dateFrom, offer.dateTo].filter(Boolean).join(' – ');
+              const kindColor = offer.offerKind ? (KIND_COLORS[offer.offerKind] ?? '#6b7280') : null;
               return (
                 <tr key={offer.id} className={i % 2 === 0 ? 'bg-white' : 'bg-neutral-50/40'}>
                   <td className="px-4 py-3 align-top">
@@ -191,13 +188,21 @@ function TariffTable({
                   </td>
                   <td className="px-4 py-3 align-top">
                     <button onClick={() => onSelectOffer(offer)} className="text-left group">
-                      <div className="flex items-center gap-1.5 mb-0.5">
+                      <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                         <span className="text-xs font-semibold text-neutral-800 group-hover:text-blue-700 transition-colors leading-snug">
                           {offer.offerName}
                         </span>
-                        {offer.offerKind && (
-                          <span className={`shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded ${KIND_COLORS[offer.offerKind] ?? 'bg-neutral-100 text-neutral-500'}`}>
+                        {offer.offerKind && kindColor && (
+                          <span
+                            className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded"
+                            style={{ backgroundColor: `${kindColor}18`, color: kindColor }}
+                          >
                             {offer.offerKind}
+                          </span>
+                        )}
+                        {offer.billingPeriod && (
+                          <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-500">
+                            {offer.billingPeriod}
                           </span>
                         )}
                       </div>
@@ -252,6 +257,8 @@ function OfferDrawer({ offer, onClose }: { offer: Offer | null; onClose: () => v
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
+  const kindColor = offer?.offerKind ? (KIND_COLORS[offer.offerKind] ?? '#6b7280') : null;
+
   return (
     <AnimatePresence>
       {offer && (
@@ -280,10 +287,16 @@ function OfferDrawer({ offer, onClose }: { offer: Offer | null; onClose: () => v
                   <span className="text-xs px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 font-medium">{offer.tariff}</span>
                   <span className="text-xs px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 font-medium">{offer.platform}</span>
                   <span className="text-xs px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 font-medium">{offer.country}</span>
-                  {offer.offerKind && (
-                    <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${KIND_COLORS[offer.offerKind] ?? 'bg-neutral-100 text-neutral-500'}`}>
+                  {offer.offerKind && kindColor && (
+                    <span
+                      className="text-xs px-2 py-0.5 rounded-md font-medium"
+                      style={{ backgroundColor: `${kindColor}18`, color: kindColor }}
+                    >
                       {offer.offerKind}
                     </span>
+                  )}
+                  {offer.billingPeriod && (
+                    <span className="text-xs px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-500 font-medium">{offer.billingPeriod}</span>
                   )}
                 </div>
                 <h2 className="text-base font-bold text-neutral-900 leading-snug">{offer.offerName}</h2>
@@ -295,7 +308,6 @@ function OfferDrawer({ offer, onClose }: { offer: Offer | null; onClose: () => v
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
-              {/* Price / Duration highlight */}
               {(offer.price || offer.duration) && (
                 <div className="flex gap-4 p-4 bg-neutral-50 rounded-xl">
                   {offer.price && (
@@ -433,6 +445,7 @@ function OffersTable({
                     offers={tariffOffers}
                     platformFilter={filters.platform}
                     kindFilter={filters.offerKind}
+                    billingPeriodFilter={filters.billingPeriod}
                     activeCountries={activeCountries}
                     onSelectOffer={onSelectOffer}
                   />
@@ -455,6 +468,7 @@ function OffersTable({
           offers={tariffOffers}
           platformFilter={filters.platform}
           kindFilter={filters.offerKind}
+          billingPeriodFilter={filters.billingPeriod}
           activeCountries={activeCountries}
           onSelectOffer={onSelectOffer}
         />
@@ -468,98 +482,174 @@ function OffersTable({
 const selectClass = "px-3.5 py-2.5 text-sm rounded-xl border border-neutral-200 bg-white focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100 outline-none transition-all";
 
 export function OffersClient() {
-  const [filters, setFilters] = useState<OfferFilters>(DEFAULT_FILTERS);
-  const [offers, setOffers] = useState<Offer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [filters,  setFilters]  = useState<OfferFilters>(DEFAULT_FILTERS);
+  const [offers,   setOffers]   = useState<Offer[]>([]);
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState<string | null>(null);
   const [selected, setSelected] = useState<Offer | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'timeline'>('table');
 
   const updateFilters = useCallback((patch: Partial<OfferFilters>) => {
     setFilters(prev => ({ ...prev, ...patch }));
   }, []);
 
+  // Load table data (only when in table mode)
   useEffect(() => {
+    if (viewMode !== 'table') return;
     let cancelled = false;
     setLoading(true);
     setError(null);
 
     const adapter =
-      filters.offerType === 'future' ? futureOffersAdapter :
+      filters.offerType === 'future'  ? futureOffersAdapter  :
       filters.offerType === 'current' ? currentOffersAdapter :
       oldOffersAdapter;
 
     adapter(filters)
       .then(data => { if (!cancelled) { setOffers(data); setLoading(false); } })
-      .catch(() => { if (!cancelled) { setError('Could not load offers data. Please check the source connection.'); setLoading(false); } });
+      .catch(() => { if (!cancelled) { setError('Could not load offers data.'); setLoading(false); } });
 
     return () => { cancelled = true; };
-  }, [filters]);
+  }, [filters, viewMode]);
 
-  const TYPE_TABS: { key: OffersClient.OfferTypeKey; label: string }[] = [
-    { key: 'future',  label: 'Future Offers' },
-    { key: 'current', label: 'Current Offers' },
-    { key: 'old',     label: 'Old Offers' },
-  ];
+  const TYPE_TABS = [
+    { key: 'future',  label: 'Future' },
+    { key: 'current', label: 'Current' },
+    { key: 'old',     label: 'Old' },
+  ] as const;
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-neutral-900">Offers</h1>
-        <p className="text-sm text-neutral-500 mt-0.5">Subscription offers by country, tariff and platform</p>
+        <p className="text-sm text-neutral-500 mt-0.5">Subscription offers by country, service and platform</p>
       </div>
 
-      {/* Filters */}
+      {/* ── Top controls ── */}
       <div className="flex flex-col gap-3">
-        {/* Offer type tabs */}
-        <div className="flex gap-1 p-1 bg-neutral-100 rounded-xl w-fit">
-          {TYPE_TABS.map(({ key, label }) => (
+
+        {/* Row 1: offer type tabs + view switcher */}
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          {/* Offer type (table only) */}
+          {viewMode === 'table' && (
+            <div className="flex gap-1 p-1 bg-neutral-100 rounded-xl w-fit">
+              {TYPE_TABS.map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => updateFilters({ offerType: key })}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                    filters.offerType === key
+                      ? 'bg-white text-neutral-900 shadow-sm'
+                      : 'text-neutral-500 hover:text-neutral-700'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+          {viewMode === 'timeline' && <div />}
+
+          {/* View switcher */}
+          <div className="flex gap-1 p-1 bg-neutral-100 rounded-xl w-fit">
             <button
-              key={key}
-              onClick={() => updateFilters({ offerType: key as OfferFilters['offerType'] })}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                filters.offerType === key
+              onClick={() => setViewMode('table')}
+              className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                viewMode === 'table'
                   ? 'bg-white text-neutral-900 shadow-sm'
                   : 'text-neutral-500 hover:text-neutral-700'
               }`}
             >
-              {label}
+              <LayoutList size={14} />
+              Table
             </button>
-          ))}
+            <button
+              onClick={() => setViewMode('timeline')}
+              className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                viewMode === 'timeline'
+                  ? 'bg-white text-neutral-900 shadow-sm'
+                  : 'text-neutral-500 hover:text-neutral-700'
+              }`}
+            >
+              <GanttChartSquare size={14} />
+              Timeline
+            </button>
+          </div>
         </div>
 
-        {/* Secondary filters */}
+        {/* Row 2: secondary filters */}
         <div className="flex flex-wrap gap-3 items-center">
           <CountryMultiselect
             value={filters.countries}
             onChange={countries => updateFilters({ countries })}
           />
-          <select
-            value={filters.tariff}
-            onChange={e => updateFilters({ tariff: e.target.value as Tariff | 'All' })}
-            className={selectClass}
-          >
-            <option value="All">All tariffs</option>
-            {TARIFFS.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
-          <select
-            value={filters.platform}
-            onChange={e => updateFilters({ platform: e.target.value as Platform | 'All' })}
-            className={selectClass}
-          >
-            <option value="All">All platforms</option>
-            {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
+
+          {/* Service / kind */}
           <select
             value={filters.offerKind}
             onChange={e => updateFilters({ offerKind: e.target.value as OfferKind | 'All' })}
             className={selectClass}
           >
-            <option value="All">All kinds</option>
+            <option value="All">All services</option>
             {OFFER_KINDS.map(k => <option key={k} value={k}>{k}</option>)}
           </select>
 
-          {/* Period filter — only for old offers */}
-          {filters.offerType === 'old' && (
+          {/* Billing period */}
+          <select
+            value={filters.billingPeriod}
+            onChange={e => updateFilters({ billingPeriod: e.target.value as BillingPeriod | 'All' })}
+            className={selectClass}
+          >
+            <option value="All">Monthly & Yearly</option>
+            {BILLING_PERIODS.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+
+          {/* Month */}
+          <select
+            value={filters.month}
+            onChange={e => updateFilters({ month: e.target.value === 'All' ? 'All' : parseInt(e.target.value) })}
+            className={selectClass}
+          >
+            <option value="All">All months</option>
+            {MONTHS.map((name, i) => (
+              <option key={i + 1} value={i + 1}>{name}</option>
+            ))}
+          </select>
+
+          {/* Year */}
+          <select
+            value={filters.year}
+            onChange={e => updateFilters({ year: e.target.value === 'All' ? 'All' : parseInt(e.target.value) })}
+            className={selectClass}
+          >
+            <option value="All">All years</option>
+            {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+
+          {/* Table-only filters */}
+          {viewMode === 'table' && (
+            <>
+              <select
+                value={filters.tariff}
+                onChange={e => updateFilters({ tariff: e.target.value as Tariff | 'All' })}
+                className={selectClass}
+              >
+                <option value="All">All tariffs</option>
+                {TARIFFS.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <select
+                value={filters.platform}
+                onChange={e => updateFilters({ platform: e.target.value as Platform | 'All' })}
+                className={selectClass}
+              >
+                <option value="All">All platforms</option>
+                {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </>
+          )}
+
+          {/* Period filter — old offers, table mode */}
+          {viewMode === 'table' && filters.offerType === 'old' && (
             <div className="flex items-center gap-2">
               <div className="flex gap-1 p-1 bg-neutral-100 rounded-xl">
                 {(['7d', '30d', '90d', 'custom'] as Period[]).map(p => (
@@ -598,22 +688,21 @@ export function OffersClient() {
         </div>
       </div>
 
-      {/* Table */}
-      <OffersTable
-        offers={offers}
-        filters={filters}
-        loading={loading}
-        error={error}
-        onSelectOffer={setSelected}
-      />
+      {/* ── Content ── */}
+      {viewMode === 'table' ? (
+        <OffersTable
+          offers={offers}
+          filters={filters}
+          loading={loading}
+          error={error}
+          onSelectOffer={setSelected}
+        />
+      ) : (
+        <GanttView filters={filters} onSelectOffer={setSelected} />
+      )}
 
-      {/* Drawer */}
+      {/* Drawer (shared between table + timeline) */}
       <OfferDrawer offer={selected} onClose={() => setSelected(null)} />
     </div>
   );
-}
-
-// eslint-disable-next-line @typescript-eslint/no-namespace
-namespace OffersClient {
-  export type OfferTypeKey = 'future' | 'current' | 'old';
 }

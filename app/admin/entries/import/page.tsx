@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowLeft, Download } from "lucide-react";
@@ -20,9 +19,7 @@ export default async function ImportEntriesPage() {
   const templateHref = `data:text/csv;charset=utf-8,${encodeURIComponent(CSV_TEMPLATE)}`;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar role={session!.user.role} name={session!.user.name} />
-      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
+    <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-3">
             <Link href="/admin">
@@ -79,6 +76,5 @@ export default async function ImportEntriesPage() {
           </div>
         </div>
       </main>
-    </div>
   );
 }

@@ -4,8 +4,8 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/Button";
-import { LogOut, LayoutDashboard, Settings, Palette, Plus, Tag } from "lucide-react";
-import { canManageContent, hasAdminAccess } from "@/lib/roles";
+import { LogOut, LayoutDashboard, Settings, Palette, Plus, Tag, HelpCircle, Wand2, Link2 } from "lucide-react";
+import { canManageContent, hasAdminAccess, canManageOffers } from "@/lib/roles";
 
 interface NavbarProps {
   role: string;
@@ -19,6 +19,7 @@ export function Navbar({ role, name }: NavbarProps) {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/brand-materials", label: "Brand", icon: Palette },
     { href: "/offers", label: "Offers", icon: Tag },
+    { href: "/crm-maker", label: "CRM Maker", icon: Wand2 },
     ...(hasAdminAccess(role) ? [{ href: "/admin", label: "Admin", icon: Settings }] : []),
   ];
 
@@ -50,6 +51,15 @@ export function Navbar({ role, name }: NavbarProps) {
                 {label}
               </Link>
             ))}
+            <a
+              href="https://creative-renamer.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
+            >
+              <Link2 size={15} />
+              Renamer
+            </a>
           </nav>
         </div>
         <div className="flex items-center gap-3">
@@ -58,6 +68,13 @@ export function Navbar({ role, name }: NavbarProps) {
               <Button size="sm" variant="ghost">
                 <Plus size={15} />
                 <span className="hidden sm:block">New Entry</span>
+              </Button>
+            </Link>
+          )}
+          {canManageOffers(role) && (
+            <Link href="/instructions" title="Instructions">
+              <Button size="sm" variant="ghost">
+                <HelpCircle size={15} />
               </Button>
             </Link>
           )}

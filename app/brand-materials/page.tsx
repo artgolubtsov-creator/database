@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { unstable_cache } from "next/cache";
-import { Navbar } from "@/components/Navbar";
 import { ExternalLink, Plus, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
@@ -40,9 +39,7 @@ export default async function BrandMaterialsPage() {
   const activeOffers = grouped["ACTIVE_OFFER"] ?? [];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar role={role} name={session!.user.name} />
-      <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-8 flex flex-col gap-10">
+    <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-8 flex flex-col gap-10">
 
         {/* Active Offer — table */}
         {activeOffers.length > 0 && (
@@ -162,6 +159,5 @@ export default async function BrandMaterialsPage() {
           </div>
         )}
       </main>
-    </div>
   );
 }

@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { Navbar } from "@/components/Navbar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatDate } from "@/lib/utils";
@@ -16,9 +15,7 @@ export default async function UsersPage() {
   const users = await prisma.user.findMany({ orderBy: { createdAt: "asc" } });
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar role={session.user.role} name={session.user.name} />
-      <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
+    <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-8">
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <div>
@@ -74,6 +71,5 @@ export default async function UsersPage() {
           </div>
         </div>
       </main>
-    </div>
   );
 }
