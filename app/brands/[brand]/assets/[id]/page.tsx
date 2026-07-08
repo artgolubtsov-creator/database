@@ -2,8 +2,9 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getBrand } from "@/lib/brands"
 import { getAssetById } from "@/lib/mock-data"
-import { ChevronLeft, Download, Clock, Tag } from "lucide-react"
+import { ChevronLeft, Clock, Tag } from "lucide-react"
 import { FileText, Video, Image, FileCode } from "lucide-react"
+import { AssetActions } from "./AssetActions"
 
 const FORMAT_ICONS = { IMAGE: Image, VIDEO: Video, PDF: FileText, TEMPLATE: FileCode }
 const STATUS_CLASS = {
@@ -128,10 +129,7 @@ export default async function AssetDetailPage({
             </div>
           </div>
 
-          {/* Download */}
-          <button className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors">
-            <Download size={15} /> Download Original
-          </button>
+          <AssetActions status={asset.status} />
         </div>
       </div>
     </div>
