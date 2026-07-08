@@ -3,22 +3,19 @@ import { useState } from "react"
 import { AssetCard } from "@/components/AssetCard"
 import type { MockAsset, AssetFormat, AssetStatus } from "@/types/mock"
 import { Search, Upload } from "lucide-react"
-import { useDemoRole, isExternalOnly, canUpload } from "@/lib/demo-role-context"
+import { useDemoRole, canUpload } from "@/lib/demo-role-context"
 
 const ALL_FORMATS: AssetFormat[] = ["IMAGE", "VIDEO", "PDF", "TEMPLATE"]
 const ALL_STATUSES: AssetStatus[] = ["APPROVED", "REVIEW", "DRAFT", "ARCHIVED"]
 
 export function AssetsClient({ assets, brandSlug }: { assets: MockAsset[]; brandSlug: string }) {
   const { demoRole } = useDemoRole()
-  const isExternal = isExternalOnly(demoRole)
 
   const [search, setSearch] = useState("")
   const [format, setFormat] = useState<AssetFormat | "ALL">("ALL")
   const [status, setStatus] = useState<AssetStatus | "ALL">("ALL")
 
-  const visibleAssets = isExternal ? assets.filter((a) => a.status === "APPROVED") : assets
-
-  const filtered = visibleAssets.filter((a) => {
+  const filtered = assets.filter((a) => {
     const matchSearch = a.name.toLowerCase().includes(search.toLowerCase()) ||
       a.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))
     const matchFormat = format === "ALL" || a.format === format
@@ -47,16 +44,14 @@ export function AssetsClient({ assets, brandSlug }: { assets: MockAsset[]; brand
           <option value="ALL">All Formats</option>
           {ALL_FORMATS.map((f) => <option key={f} value={f}>{f}</option>)}
         </select>
-        {!isExternal && (
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as AssetStatus | "ALL")}
-            className="px-3 py-2 text-sm border border-neutral-200 rounded-lg bg-white focus:outline-none"
-          >
-            <option value="ALL">All Statuses</option>
-            {ALL_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-        )}
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value as AssetStatus | "ALL")}
+          className="px-3 py-2 text-sm border border-neutral-200 rounded-lg bg-white focus:outline-none"
+        >
+          <option value="ALL">All Statuses</option>
+          {ALL_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
         <span className="text-xs text-neutral-400 ml-auto">{filtered.length} assets</span>
         {canUpload(demoRole) && (
           <button className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors">

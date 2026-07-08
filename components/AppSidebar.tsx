@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
-import { useDemoRole, canUpload } from "@/lib/demo-role-context"
+import { useDemoRole, canUpload, canAccessOffers, canAccessBrands } from "@/lib/demo-role-context"
 import { BRANDS, getBrand } from "@/lib/brands"
 import {
   LayoutDashboard, Tag, Wand2, Settings, LogOut,
@@ -30,11 +30,14 @@ export function AppSidebar({ userName, userRole }: AppSidebarProps) {
     if (activeBrandSlug || pathname === "/brands") setBrandsOpen(true)
   }, [pathname, activeBrandSlug])
 
+  const showOffers = canAccessOffers(demoRole)
+  const showBrands = canAccessBrands(demoRole)
+
   const topLinks = [
-    { href: "/dashboard", label: "Database", icon: LayoutDashboard },
-    { href: "/offers", label: "Offers", icon: Tag },
-    { href: "/crm-maker", label: "CRM Maker", icon: Wand2 },
-  ]
+    { href: "/dashboard", label: "Database", icon: LayoutDashboard, always: true },
+    { href: "/offers", label: "Offers", icon: Tag, always: false, show: showOffers },
+    { href: "/crm-maker", label: "CRM Maker", icon: Wand2, always: false, show: showOffers },
+  ].filter((l) => l.always || l.show)
 
   const isActive = (href: string, exact = false) =>
     exact ? pathname === href : pathname.startsWith(href)
@@ -82,9 +85,10 @@ export function AppSidebar({ userName, userRole }: AppSidebarProps) {
           </Link>
         ))}
 
-        <div className="h-px bg-neutral-100 my-2" />
+        {showBrands && <div className="h-px bg-neutral-100 my-2" />}
 
         {/* Brand section */}
+        {showBrands && <>
         <div className={cn(
           "flex items-center rounded-lg text-sm transition-colors",
           pathname === "/brands" || activeBrandSlug
@@ -159,7 +163,9 @@ export function AppSidebar({ userName, userRole }: AppSidebarProps) {
           </div>
         )}
 
-        {canUpload(demoRole) && activeBrandSlug && (
+        </>}
+
+        {showBrands && canUpload(demoRole) && activeBrandSlug && (
           <>
             <div className="h-px bg-neutral-100 my-2" />
             <button className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">

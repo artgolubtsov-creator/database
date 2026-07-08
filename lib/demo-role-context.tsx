@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 import type { DemoRole } from "@/types/mock"
 
 const STORAGE_KEY = "update_demo_role"
-const DEFAULT_ROLE: DemoRole = "Admin"
+const DEFAULT_ROLE: DemoRole = "Админ"
 
 interface DemoRoleContextValue {
   demoRole: DemoRole
@@ -40,17 +40,23 @@ export function useDemoRole() {
 }
 
 export function canUpload(role: DemoRole) {
-  return role === "Admin" || role === "Менеджер офферов"
+  return role === "Админ" || role === "Супер Едитор"
 }
 export function canApprove(role: DemoRole) {
-  return role === "Admin" || role === "Менеджер офферов"
+  return role === "Админ" || role === "Супер Едитор"
 }
 export function canCreateCollection(role: DemoRole) {
-  return role === "Admin" || role === "Менеджер офферов" || role === "Внутренний заказчик"
+  return role === "Админ" || role === "Супер Едитор"
 }
 export function canSharePortal(role: DemoRole) {
-  return role === "Admin" || role === "Менеджер офферов"
+  return role === "Админ" || role === "Супер Едитор"
 }
-export function isExternalOnly(role: DemoRole) {
-  return role === "Внешний подрядчик"
+export function canAccessOffers(role: DemoRole) {
+  return role === "Админ" || role === "Супер Едитор" || role === "Маркетинг"
+}
+export function canAccessBrands(role: DemoRole) {
+  return role === "Админ" || role === "Супер Едитор" || role === "Маркетинг"
+}
+export function canManageUsers(role: DemoRole) {
+  return role === "Админ"
 }

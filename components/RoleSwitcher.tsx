@@ -2,13 +2,13 @@
 import { useDemoRole } from "@/lib/demo-role-context"
 import type { DemoRole } from "@/types/mock"
 
-const ROLES: DemoRole[] = ["Admin", "Менеджер офферов", "Внутренний заказчик", "Внешний подрядчик"]
+const ROLES: DemoRole[] = ["Админ", "Супер Едитор", "Редактор", "Маркетинг"]
 
 const ROLE_COLORS: Record<DemoRole, string> = {
-  "Admin": "bg-neutral-900 text-white",
-  "Менеджер офферов": "bg-violet-600 text-white",
-  "Внутренний заказчик": "bg-sky-600 text-white",
-  "Внешний подрядчик": "bg-amber-500 text-white",
+  "Админ": "bg-neutral-900 text-white",
+  "Супер Едитор": "bg-violet-600 text-white",
+  "Редактор": "bg-sky-600 text-white",
+  "Маркетинг": "bg-amber-500 text-white",
 }
 
 export function RoleSwitcher() {
