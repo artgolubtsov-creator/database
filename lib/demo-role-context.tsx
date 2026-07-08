@@ -46,7 +46,7 @@ export function canApprove(role: DemoRole) {
   return role === "Admin" || role === "Менеджер офферов"
 }
 export function canCreateCollection(role: DemoRole) {
-  return role === "Admin" || role === "Менеджер офферов"
+  return role === "Admin" || role === "Менеджер офферов" || role === "Внутренний заказчик"
 }
 export function canSharePortal(role: DemoRole) {
   return role === "Admin" || role === "Менеджер офферов"
