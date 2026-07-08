@@ -2,7 +2,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useCallback, useTransition, useState } from "react";
 import { Select } from "@/components/ui/Select";
-import { Search, SlidersHorizontal, ChevronUp, ChevronLeft, ChevronRight, Link2, HardDrive } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronUp, ChevronLeft, ChevronRight, Link2, HardDrive, ArrowDownUp } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -42,6 +42,7 @@ interface Props {
   initialGenre: string;
   initialDateFrom: string;
   initialDateTo: string;
+  initialSort: string;
 }
 
 const CONTENT_TYPE_OPTIONS = [
@@ -130,7 +131,7 @@ function StatusCell({ entry }: { entry: Entry }) {
 
 export function DashboardClient({
   entries, total, page, pageSize,
-  initialQ, initialContentType, initialCountry, initialGenre, initialDateFrom, initialDateTo,
+  initialQ, initialContentType, initialCountry, initialGenre, initialDateFrom, initialDateTo, initialSort,
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -179,6 +180,14 @@ export function DashboardClient({
             onChange={(e) => updateParams({ type: e.target.value })}
             className="sm:w-40"
           />
+          <button
+            onClick={() => updateParams({ sort: initialSort === "oldest" ? "newest" : "oldest" })}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 text-sm rounded-xl border border-neutral-200 bg-white text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 transition-all whitespace-nowrap"
+            title={initialSort === "oldest" ? "Oldest first" : "Newest first"}
+          >
+            <ArrowDownUp size={15} />
+            <span className="hidden sm:inline">{initialSort === "oldest" ? "Oldest first" : "Newest first"}</span>
+          </button>
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
             className={`inline-flex items-center gap-2 px-3.5 py-2.5 text-sm rounded-xl border transition-all ${

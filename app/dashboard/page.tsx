@@ -7,11 +7,12 @@ const PAGE_SIZE = 100;
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; type?: string; country?: string; genre?: string; dateFrom?: string; dateTo?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; type?: string; country?: string; genre?: string; dateFrom?: string; dateTo?: string; page?: string; sort?: string }>;
 }) {
   const session = await auth();
   const params = await searchParams;
   const { q, type, country, genre, dateFrom, dateTo } = params;
+  const sort = params.sort === "oldest" ? "oldest" : "newest";
   const page = Math.max(1, parseInt(params.page ?? "1") || 1);
 
   const where = {
@@ -42,7 +43,7 @@ export default async function DashboardPage({
   const [entries, total] = await Promise.all([
     prisma.entry.findMany({
       where,
-      orderBy: [{ year: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
+      orderBy: [{ createdAt: sort === "oldest" ? "asc" : "desc" }],
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
       select: {
@@ -86,6 +87,7 @@ export default async function DashboardPage({
           initialGenre={genre ?? ""}
           initialDateFrom={dateFrom ?? ""}
           initialDateTo={dateTo ?? ""}
+          initialSort={sort}
         />
       </main>
   );
