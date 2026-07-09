@@ -8,6 +8,77 @@
 
 ---
 
+## Codex implementation update for Claude
+
+**Branch:** `feat/codex-handoff-tasks`  
+**Latest commit:** `3bf2272 feat: align content hub IA`  
+**PR URL:** <https://github.com/artgolubtsov-creator/database/pull/new/feat/codex-handoff-tasks>
+
+Codex implemented Tasks 1-4 from this handoff and added one follow-up IA cleanup pass after product review.
+
+### What changed
+
+- **Task 1 — External portal auth prototype**
+  - Added `/portal/login`.
+  - Added `lib/portal-mock-auth.ts` with mock email/code access and `allowedTokens`.
+  - Added `portal_session` cookie check in `app/portal/[token]/layout.tsx`.
+  - Missing sessions redirect to `/portal/login?redirect=/portal/<token>`.
+
+- **Task 2 — Yango Taxi brand**
+  - Added `yango-taxi` to `BrandSlug`.
+  - Added Yango Taxi config in `lib/brands.ts`.
+  - Added 9 mock assets, 2 external collections, and guidelines in `lib/mock-data.ts`.
+
+- **Task 3 — Partner portal share button**
+  - Collection detail now copies a partner portal link for `EXTERNAL` collections.
+  - Button label changed to `Copy partner link`.
+  - Link is built from `NEXT_PUBLIC_APP_URL` when available, otherwise current origin.
+  - Added brand-boundary guard so a collection cannot be opened under another brand URL.
+
+- **Task 4 — Admin users**
+  - Added `DeactivateUserToggle` client component in the users table.
+  - Added `PUT /api/admin/users/[id]` while keeping existing `PATCH`.
+  - Existing role selector and role badges remain wired to `lib/roles.ts`.
+
+- **IA cleanup after team review**
+  - Sidebar now follows the new sitemap direction: `Content`, `Titles`, `Brands`, `All brands`, `Admin`.
+  - Microcopy changed from `External/Internal` to `Partner portal/Team only`.
+  - Removed non-functional `Upload` and `New Collection` buttons from Brand Hub UI.
+  - `RoleSwitcher` is hidden in production and labeled as demo preview in development.
+  - Added empty states for assets, collections, brand overview, and partner portal.
+  - Removed fake asset comments and fake version authors from asset detail.
+  - Partner portal footer now reads as Partner Portal, not internal `update` branding.
+  - Removed existing production `console.log`.
+  - Made Figma cron route fail closed when `CRON_SECRET` is missing.
+
+### Verification
+
+- `npx tsc --noEmit` passes with zero errors.
+- `rg "console\\.log" app components lib types` returns no matches.
+- No new dependencies added.
+- Changes are already pushed to `origin/feat/codex-handoff-tasks`.
+
+### Claude next steps
+
+1. Open the PR from `feat/codex-handoff-tasks` to `main`.
+2. Review the diff, especially:
+   - portal mock auth boundaries,
+   - `CRON_SECRET` fail-closed behavior,
+   - Brand Hub IA copy changes,
+   - admin user toggle behavior.
+3. If clean, merge to `main`.
+4. Confirm Vercel production deploy completes for `yango-play-content-hub.vercel.app`.
+
+### Important caveats
+
+- The external portal auth is still a **prototype**, not production-grade partner auth.
+- Current Brand Hub data still comes from `lib/mock-data.ts`; it has not been migrated to Prisma.
+- Do not treat current portal tokens like `ext-yp-brand` as secure production grants.
+- Before real partner usage, add real opaque tokens/sessions, expiry, revoke, audit logging, and server-side RBAC.
+- Before large-scale manual asset operations, decide whether Brand Hub remains controlled static data or moves to Prisma tables.
+
+---
+
 ## Architecture overview
 
 ```
