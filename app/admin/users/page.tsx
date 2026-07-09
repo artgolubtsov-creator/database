@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { ROLE_LABELS } from "@/lib/roles";
 import { Plus, Pencil } from "lucide-react";
+import { DeactivateUserToggle } from "./DeactivateUserToggle";
 
 export default async function UsersPage() {
   const session = await auth();
@@ -36,6 +37,7 @@ export default async function UsersPage() {
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide">Role</th>
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide">Status</th>
                   <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide hidden md:table-cell">Joined</th>
+                  <th className="px-5 py-3.5 text-xs font-medium text-neutral-400 uppercase tracking-wide">Active</th>
                   <th className="px-5 py-3.5 w-16"></th>
                 </tr>
               </thead>
@@ -56,6 +58,9 @@ export default async function UsersPage() {
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-neutral-400 text-xs hidden md:table-cell">{formatDate(user.createdAt)}</td>
+                    <td className="px-5 py-3.5">
+                      <DeactivateUserToggle userId={user.id} isActive={user.isActive} />
+                    </td>
                     <td className="px-5 py-3.5">
                       <Link href={`/admin/users/${user.id}/edit`}>
                         <Button variant="ghost" size="sm"><Pencil size={13} /></Button>

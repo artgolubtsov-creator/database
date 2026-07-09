@@ -1,4 +1,4 @@
-export type BrandSlug = 'yango-play' | 'yasmina' | 'yango-music' | 'yango-plus'
+export type BrandSlug = 'yango-play' | 'yasmina' | 'yango-music' | 'yango-plus' | 'yango-taxi'
 export type AssetFormat = 'IMAGE' | 'VIDEO' | 'PDF' | 'TEMPLATE'
 export type AssetStatus = 'APPROVED' | 'REVIEW' | 'DRAFT' | 'ARCHIVED'
 export type CollectionAccess = 'INTERNAL' | 'EXTERNAL'

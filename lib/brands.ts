@@ -42,6 +42,14 @@ export const BRANDS: BrandConfig[] = [
     description: 'Subscription bundle with Taxi, Music and more',
     emoji: '⚡',
   },
+  {
+    slug: 'yango-taxi',
+    name: 'Yango Taxi',
+    accent: '#F5A623',
+    accentForeground: '#000000',
+    description: 'Ride-hailing service across MENA and Africa',
+    emoji: '🚗',
+  },
 ]
 
 export function getBrand(slug: string): BrandConfig | undefined {

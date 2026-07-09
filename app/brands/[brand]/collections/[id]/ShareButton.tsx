@@ -1,19 +1,28 @@
 "use client"
 import { useDemoRole, canSharePortal } from "@/lib/demo-role-context"
-import Link from "next/link"
-import { Share2 } from "lucide-react"
+import { useState } from "react"
+import { Check, Link2 } from "lucide-react"
 
 export function ShareButton({ token }: { token: string }) {
   const { demoRole } = useDemoRole()
+  const [copied, setCopied] = useState(false)
+
   if (!canSharePortal(demoRole)) return null
 
+  const copy = async () => {
+    await navigator.clipboard.writeText(`https://yango-play-content-hub.vercel.app/portal/${token}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
-    <Link
-      href={`/portal/${token}`}
-      target="_blank"
+    <button
+      type="button"
+      onClick={copy}
       className="flex items-center gap-1.5 text-sm font-medium bg-neutral-900 text-white px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors"
     >
-      <Share2 size={13} /> Share Link
-    </Link>
+      {copied ? <Check size={13} /> : <Link2 size={13} />}
+      {copied ? "Copied!" : "Share Portal Link"}
+    </button>
   )
 }

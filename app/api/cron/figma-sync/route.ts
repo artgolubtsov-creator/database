@@ -12,7 +12,6 @@ export async function GET(req: NextRequest) {
 
   try {
     const result = await syncFigmaLinks();
-    console.log("[figma-sync]", result);
     return NextResponse.json({ ok: true, ...result });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Unknown error";

@@ -48,6 +48,17 @@ export const MOCK_ASSETS: MockAsset[] = [
   { id: 'pl-4', brandSlug: 'yango-plus', name: 'Annual Offer — Landing Assets', format: 'IMAGE', status: 'APPROVED', campaign: 'Annual Offer', tags: ['landing', 'annual', 'offer'], versions: 3, updatedAt: '2026-02-15', size: '2.2 MB', collectionIds: [] },
   { id: 'pl-5', brandSlug: 'yango-plus', name: 'Sharjah Banners', format: 'IMAGE', status: 'ARCHIVED', campaign: 'Sharjah', tags: ['banner', 'uae', 'sharjah'], versions: 1, updatedAt: '2025-12-10', size: '1.1 MB', collectionIds: [] },
   { id: 'pl-6', brandSlug: 'yango-plus', name: 'Brand Guide v1', format: 'PDF', status: 'APPROVED', tags: ['guidelines'], versions: 1, updatedAt: '2026-01-15', size: '4.2 MB', collectionIds: ['pl-col-1'] },
+
+  // Yango Taxi
+  { id: 'tx-1', brandSlug: 'yango-taxi', name: 'Taxi Logo — Primary', format: 'IMAGE', status: 'APPROVED', tags: ['logo', 'brand'], versions: 2, updatedAt: '2026-06-12', size: '46 KB', dimensions: '1200×400', collectionIds: ['tx-col-1'] },
+  { id: 'tx-2', brandSlug: 'yango-taxi', name: 'Taxi App Icon — Yellow', format: 'IMAGE', status: 'APPROVED', tags: ['icon', 'app store'], versions: 1, updatedAt: '2026-06-12', size: '22 KB', dimensions: '512×512', collectionIds: ['tx-col-1'] },
+  { id: 'tx-3', brandSlug: 'yango-taxi', name: 'Driver Partner Banner Pack', format: 'IMAGE', status: 'APPROVED', campaign: 'Driver Growth', tags: ['driver', 'banner', 'partner'], versions: 2, updatedAt: '2026-06-24', size: '1.4 MB', collectionIds: ['tx-col-2'] },
+  { id: 'tx-4', brandSlug: 'yango-taxi', name: 'Airport Pickup Stories', format: 'IMAGE', status: 'APPROVED', campaign: 'Airport Pickup', tags: ['airport', 'stories', 'social'], versions: 1, updatedAt: '2026-06-30', size: '760 KB', dimensions: '1080×1920', collectionIds: ['tx-col-2'] },
+  { id: 'tx-5', brandSlug: 'yango-taxi', name: 'MENA Launch OOH Mockups', format: 'IMAGE', status: 'REVIEW', campaign: 'MENA Launch', tags: ['ooh', 'mena', 'launch'], versions: 1, updatedAt: '2026-07-03', size: '8.6 MB', dimensions: '3000×1500', collectionIds: [] },
+  { id: 'tx-6', brandSlug: 'yango-taxi', name: 'Brand Guidelines v1.2', format: 'PDF', status: 'APPROVED', tags: ['guidelines', 'brand'], versions: 2, updatedAt: '2026-05-18', size: '5.9 MB', collectionIds: ['tx-col-1'] },
+  { id: 'tx-7', brandSlug: 'yango-taxi', name: 'Safety Campaign — Video 15s', format: 'VIDEO', status: 'APPROVED', campaign: 'Safety First', tags: ['video', 'safety'], versions: 1, updatedAt: '2026-06-04', size: '28 MB', dimensions: '1920×1080', collectionIds: ['tx-col-2'] },
+  { id: 'tx-8', brandSlug: 'yango-taxi', name: 'Referral Promo Static Set', format: 'IMAGE', status: 'APPROVED', campaign: 'Referral', tags: ['promo', 'referral', 'performance'], versions: 3, updatedAt: '2026-07-01', size: '940 KB', collectionIds: ['tx-col-2'] },
+  { id: 'tx-9', brandSlug: 'yango-taxi', name: 'City Landing Template', format: 'TEMPLATE', status: 'APPROVED', tags: ['landing', 'template', 'city'], versions: 1, updatedAt: '2026-06-21', size: '18 MB', collectionIds: [] },
 ]
 
 // ─── Collections ───────────────────────────────────────────────────────────
@@ -62,6 +73,8 @@ export const MOCK_COLLECTIONS: MockCollection[] = [
   { id: 'mu-col-2', brandSlug: 'yango-music', name: 'Artist Collabs', description: 'Approved visuals for artist collaborations', access: 'EXTERNAL', assetIds: ['mu-2', 'mu-4', 'mu-5'], createdAt: '2026-06-25', token: 'ext-mu-artists' },
   { id: 'pl-col-1', brandSlug: 'yango-plus', name: 'Brand Identity', description: 'Logos and brand guide', access: 'EXTERNAL', assetIds: ['pl-1', 'pl-6'], createdAt: '2026-01-20', token: 'ext-pl-brand' },
   { id: 'pl-col-2', brandSlug: 'yango-plus', name: 'UAE Campaign Pack', description: 'Banners and creatives for UAE campaigns', access: 'EXTERNAL', assetIds: ['pl-2', 'pl-3'], createdAt: '2026-06-01', token: 'ext-pl-uae' },
+  { id: 'tx-col-1', brandSlug: 'yango-taxi', name: 'Taxi Brand Kit', description: 'Core logo, app icon and brand guidelines for regional partners', access: 'EXTERNAL', assetIds: ['tx-1', 'tx-2', 'tx-6'], createdAt: '2026-06-12', token: 'ext-taxi-brand' },
+  { id: 'tx-col-2', brandSlug: 'yango-taxi', name: 'MENA Campaign Pack', description: 'Approved ride-hailing campaign materials for MENA and Africa', access: 'EXTERNAL', assetIds: ['tx-3', 'tx-4', 'tx-7', 'tx-8'], createdAt: '2026-07-01', token: 'ext-taxi-campaign' },
 ]
 
 // ─── Guidelines ────────────────────────────────────────────────────────────
@@ -150,6 +163,27 @@ export const MOCK_GUIDELINES: Record<BrandSlug, BrandGuideline> = {
     ],
     doList: ['Use red as primary action color', 'Maintain white space around logo', 'Use bold typography for offers'],
     dontList: ["Don't use red on orange backgrounds", "Don't alter the plus symbol proportions", "Don't use gradients with the logo"],
+  },
+  'yango-taxi': {
+    colors: [
+      { name: 'Taxi Yellow', hex: '#F5A623', pantone: 'Pantone 7409 C' },
+      { name: 'Signal Black', hex: '#000000' },
+      { name: 'White', hex: '#FFFFFF' },
+      { name: 'Road Grey', hex: '#6B7280' },
+      { name: 'Light Asphalt', hex: '#F3F4F6' },
+    ],
+    fonts: [
+      { name: 'YS Text', variants: ['Regular', 'Medium', 'Bold'], specimen: 'Ride now. Arrive easy.' },
+      { name: 'YS Display', variants: ['Bold', 'Black'], specimen: 'Your City Moves' },
+    ],
+    logoVariants: [
+      { name: 'Full Logo — Black', background: 'light', format: 'SVG' },
+      { name: 'Full Logo — Yellow', background: 'dark', format: 'SVG' },
+      { name: 'App Icon — Yellow', background: 'light', format: 'PNG' },
+      { name: 'Driver Partner Lockup', background: 'light', format: 'SVG' },
+    ],
+    doList: ['Use yellow for high-visibility actions', 'Keep logo clear of map UI and car imagery', 'Pair yellow with black for strongest contrast'],
+    dontList: ["Don't use yellow on low-contrast backgrounds", "Don't alter the app icon radius", "Don't combine taxi yellow with unrelated accent colors"],
   },
 }
 
