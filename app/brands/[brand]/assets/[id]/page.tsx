@@ -14,17 +14,6 @@ const STATUS_CLASS = {
   ARCHIVED: "status-archived",
 }
 
-const MOCK_VERSIONS = [
-  { version: "v3", date: "2026-07-01", author: "Паша М.", note: "Final approved version" },
-  { version: "v2", date: "2026-06-28", author: "Паша М.", note: "Revised after review" },
-  { version: "v1", date: "2026-06-25", author: "Паша М.", note: "Initial upload" },
-]
-
-const MOCK_COMMENTS = [
-  { author: "Артем Г.", date: "2026-06-30", text: "Approved! Looks great for the campaign." },
-  { author: "Паша М.", date: "2026-06-29", text: "Updated the CTA text per brief. Ready for review." },
-]
-
 export default async function AssetDetailPage({
   params,
 }: {
@@ -53,25 +42,10 @@ export default async function AssetDetailPage({
           <div className="bg-white rounded-2xl border border-neutral-200 aspect-video flex items-center justify-center mb-4">
             <Icon size={48} className="text-neutral-200" />
           </div>
-          {/* Comments */}
+          {/* Notes */}
           <div className="bg-white rounded-2xl border border-neutral-200 p-5">
-            <h3 className="text-sm font-semibold text-neutral-900 mb-4">Comments</h3>
-            <div className="flex flex-col gap-4">
-              {MOCK_COMMENTS.map((c, i) => (
-                <div key={i} className="flex gap-3">
-                  <div className="w-7 h-7 rounded-full bg-neutral-200 shrink-0 flex items-center justify-center text-xs font-bold text-neutral-600">
-                    {c.author[0]}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-medium text-neutral-900">{c.author}</span>
-                      <span className="text-[10px] text-neutral-400">{c.date}</span>
-                    </div>
-                    <p className="text-sm text-neutral-600">{c.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-2">Notes</h3>
+            <p className="text-sm text-neutral-400">No production notes have been added for this asset yet.</p>
           </div>
         </div>
 
@@ -113,19 +87,13 @@ export default async function AssetDetailPage({
             <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-500 mb-3">
               <Clock size={12} /> Version History
             </div>
-            <div className="flex flex-col gap-3">
-              {MOCK_VERSIONS.slice(0, asset.versions).map((v, i) => (
-                <div key={v.version} className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-neutral-900">{v.version}</span>
-                      {i === 0 && <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">Current</span>}
-                    </div>
-                    <p className="text-[10px] text-neutral-400">{v.date} · {v.author}</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">{v.note}</p>
-                  </div>
-                </div>
-              ))}
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-neutral-900">v{asset.versions}</span>
+                <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">Current</span>
+              </div>
+              <p className="text-[10px] text-neutral-400">{asset.updatedAt}</p>
+              <p className="text-xs text-neutral-500 mt-0.5">Version history will be available after real asset tracking is connected.</p>
             </div>
           </div>
 

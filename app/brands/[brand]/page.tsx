@@ -37,9 +37,9 @@ export default async function BrandOverviewPage({
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: "Total Assets", value: stats.total },
+          { label: "Total assets", value: stats.total },
           { label: "Approved", value: stats.approved },
-          { label: "In Review", value: stats.review },
+          { label: "Needs review", value: stats.review },
           { label: "Collections", value: stats.collections },
         ].map(({ label, value }) => (
           <div key={label} className="bg-white rounded-xl border border-neutral-200 px-5 py-4">
@@ -52,7 +52,7 @@ export default async function BrandOverviewPage({
       {/* Recent Assets */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-neutral-900">Recent Assets</h2>
+          <h2 className="text-base font-semibold text-neutral-900">Recent assets</h2>
           <Link
             href={`/brands/${brand}/assets`}
             className="flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-900 transition-colors"
@@ -60,15 +60,22 @@ export default async function BrandOverviewPage({
             View all <ArrowRight size={12} />
           </Link>
         </div>
-        <div className="grid grid-cols-3 gap-4">
-          {recent.map((asset) => (
-            <AssetCard
-              key={asset.id}
-              asset={asset}
-              href={`/brands/${brand}/assets/${asset.id}`}
-            />
-          ))}
-        </div>
+        {recent.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-neutral-200 bg-white py-12 text-center">
+            <p className="text-sm font-medium text-neutral-700">No assets yet</p>
+            <p className="mt-1 text-sm text-neutral-400">This brand is ready for real asset metadata.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-4">
+            {recent.map((asset) => (
+              <AssetCard
+                key={asset.id}
+                asset={asset}
+                href={`/brands/${brand}/assets/${asset.id}`}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Collections */}
@@ -82,15 +89,22 @@ export default async function BrandOverviewPage({
             View all <ArrowRight size={12} />
           </Link>
         </div>
-        <div className="grid grid-cols-3 gap-4">
-          {collections.map((col) => (
-            <CollectionCard
-              key={col.id}
-              collection={col}
-              href={`/brands/${brand}/collections/${col.id}`}
-            />
-          ))}
-        </div>
+        {collections.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-neutral-200 bg-white py-12 text-center">
+            <p className="text-sm font-medium text-neutral-700">No collections yet</p>
+            <p className="mt-1 text-sm text-neutral-400">Team-only and partner-ready sets will appear here.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-4">
+            {collections.map((col) => (
+              <CollectionCard
+                key={col.id}
+                collection={col}
+                href={`/brands/${brand}/collections/${col.id}`}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   )

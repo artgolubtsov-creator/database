@@ -35,33 +35,40 @@ export default async function PortalPage({ params }: { params: Promise<{ token: 
       </div>
 
       {/* Asset grid */}
-      <div className="grid grid-cols-3 gap-5">
-        {assets.map((asset) => {
-          const Icon = FORMAT_ICONS[asset.format]
-          return (
-            <div key={asset.id} className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow">
-              <div className="aspect-[4/3] bg-neutral-50 flex items-center justify-center">
-                <Icon size={32} className="text-neutral-200" />
+      {assets.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-neutral-200 bg-white py-16 text-center">
+          <p className="text-sm font-medium text-neutral-700">No files are available yet.</p>
+          <p className="mt-1 text-sm text-neutral-400">Ask your Yango contact for access to approved materials.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-5">
+          {assets.map((asset) => {
+            const Icon = FORMAT_ICONS[asset.format]
+            return (
+              <div key={asset.id} className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div className="aspect-[4/3] bg-neutral-50 flex items-center justify-center">
+                  <Icon size={32} className="text-neutral-200" />
+                </div>
+                <div className="p-4">
+                  <p className="text-sm font-medium text-neutral-900 truncate mb-1">{asset.name}</p>
+                  <p className="text-xs text-neutral-400 mb-4">{asset.size} · {asset.format}</p>
+                  <button
+                    className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                    style={{ borderColor: brand?.accent + "40" }}
+                  >
+                    <Download size={14} /> Download
+                  </button>
+                </div>
               </div>
-              <div className="p-4">
-                <p className="text-sm font-medium text-neutral-900 truncate mb-1">{asset.name}</p>
-                <p className="text-xs text-neutral-400 mb-4">{asset.size} · {asset.format}</p>
-                <button
-                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium border border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition-colors"
-                  style={{ borderColor: brand?.accent + "40" }}
-                >
-                  <Download size={14} /> Download
-                </button>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Footer */}
       <div className="text-center mt-12 pt-8 border-t border-neutral-100">
         <p className="text-xs text-neutral-400">
-          Powered by <span className="font-semibold text-neutral-600">update</span> · {collection.assetIds.length} assets in this collection
+          Partner Portal · {assets.length} approved assets · Contact your Yango owner for support
         </p>
       </div>
     </div>

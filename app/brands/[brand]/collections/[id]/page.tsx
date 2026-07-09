@@ -14,7 +14,7 @@ export default async function CollectionDetailPage({
   const { brand, id } = await params
   const config = getBrand(brand)
   const collection = getCollectionById(id)
-  if (!config || !collection) notFound()
+  if (!config || !collection || collection.brandSlug !== config.slug) notFound()
 
   const assets = getAssetsByCollection(id)
 
@@ -37,7 +37,7 @@ export default async function CollectionDetailPage({
                 : "bg-neutral-100 text-neutral-500"
             }`}>
               {collection.access === "EXTERNAL" ? <Globe size={10} /> : <Lock size={10} />}
-              {collection.access}
+              {collection.access === "EXTERNAL" ? "Partner portal" : "Team only"}
             </span>
           </div>
           <p className="text-sm text-neutral-500">{collection.description}</p>
@@ -45,6 +45,7 @@ export default async function CollectionDetailPage({
         {collection.access === "EXTERNAL" && (
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 bg-neutral-100 rounded-lg px-3 py-2">
+              <span className="text-xs text-neutral-500">Partner link</span>
               <span className="text-xs text-neutral-500 font-mono">/portal/{collection.token}</span>
             </div>
             <ShareButton token={collection.token} />

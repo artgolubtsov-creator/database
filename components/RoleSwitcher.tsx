@@ -14,10 +14,12 @@ const ROLE_COLORS: Record<DemoRole, string> = {
 export function RoleSwitcher() {
   const { demoRole, setDemoRole } = useDemoRole()
 
+  if (process.env.NODE_ENV === "production") return null
+
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
       <div className="flex flex-col gap-1 bg-white rounded-2xl shadow-lg border border-neutral-200 p-2 w-52">
-        <p className="text-[10px] font-medium text-neutral-400 uppercase tracking-wider px-2 py-1">Demo Role</p>
+        <p className="text-[10px] font-medium text-neutral-400 uppercase tracking-wider px-2 py-1">Preview as demo role</p>
         {ROLES.map((role) => (
           <button
             key={role}
@@ -33,7 +35,7 @@ export function RoleSwitcher() {
         ))}
       </div>
       <div className={`text-xs font-semibold px-3 py-1.5 rounded-full ${ROLE_COLORS[demoRole]}`}>
-        {demoRole}
+        Preview: {demoRole}
       </div>
     </div>
   )

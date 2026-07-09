@@ -2,15 +2,12 @@
 import { useState } from "react"
 import { AssetCard } from "@/components/AssetCard"
 import type { MockAsset, AssetFormat, AssetStatus } from "@/types/mock"
-import { Search, Upload } from "lucide-react"
-import { useDemoRole, canUpload } from "@/lib/demo-role-context"
+import { Search } from "lucide-react"
 
 const ALL_FORMATS: AssetFormat[] = ["IMAGE", "VIDEO", "PDF", "TEMPLATE"]
 const ALL_STATUSES: AssetStatus[] = ["APPROVED", "REVIEW", "DRAFT", "ARCHIVED"]
 
 export function AssetsClient({ assets, brandSlug }: { assets: MockAsset[]; brandSlug: string }) {
-  const { demoRole } = useDemoRole()
-
   const [search, setSearch] = useState("")
   const [format, setFormat] = useState<AssetFormat | "ALL">("ALL")
   const [status, setStatus] = useState<AssetStatus | "ALL">("ALL")
@@ -53,16 +50,20 @@ export function AssetsClient({ assets, brandSlug }: { assets: MockAsset[]; brand
           {ALL_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <span className="text-xs text-neutral-400 ml-auto">{filtered.length} assets</span>
-        {canUpload(demoRole) && (
-          <button className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors">
-            <Upload size={14} /> Upload
-          </button>
-        )}
       </div>
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="text-center py-16 text-neutral-400 text-sm">No assets match your filters</div>
+        <div className="rounded-xl border border-dashed border-neutral-200 bg-white py-16 text-center">
+          <p className="text-sm font-medium text-neutral-700">
+            {assets.length === 0 ? "No assets yet" : "No matching assets"}
+          </p>
+          <p className="mt-1 text-sm text-neutral-400">
+            {assets.length === 0
+              ? "This brand is ready for real asset metadata."
+              : "Clear search or filters to see more assets."}
+          </p>
+        </div>
       ) : (
         <div className="grid grid-cols-3 gap-4">
           {filtered.map((asset) => (

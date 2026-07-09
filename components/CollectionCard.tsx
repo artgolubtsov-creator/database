@@ -8,6 +8,8 @@ interface CollectionCardProps {
 }
 
 export function CollectionCard({ collection, href }: CollectionCardProps) {
+  const isPartnerReady = collection.access === "EXTERNAL"
+
   return (
     <Link
       href={href}
@@ -18,12 +20,12 @@ export function CollectionCard({ collection, href }: CollectionCardProps) {
           <FolderOpen size={16} className="text-neutral-400" />
         </div>
         <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full ${
-          collection.access === "EXTERNAL"
+          isPartnerReady
             ? "bg-green-50 text-green-700"
             : "bg-neutral-100 text-neutral-500"
         }`}>
-          {collection.access === "EXTERNAL" ? <Globe size={10} /> : <Lock size={10} />}
-          {collection.access === "EXTERNAL" ? "External" : "Internal"}
+          {isPartnerReady ? <Globe size={10} /> : <Lock size={10} />}
+          {isPartnerReady ? "Partner portal" : "Team only"}
         </div>
       </div>
       <p className="text-sm font-semibold text-neutral-900 mb-1">{collection.name}</p>

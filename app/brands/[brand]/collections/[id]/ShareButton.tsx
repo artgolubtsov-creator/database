@@ -10,7 +10,8 @@ export function ShareButton({ token }: { token: string }) {
   if (!canSharePortal(demoRole)) return null
 
   const copy = async () => {
-    await navigator.clipboard.writeText(`https://yango-play-content-hub.vercel.app/portal/${token}`)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
+    await navigator.clipboard.writeText(`${baseUrl}/portal/${token}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -22,7 +23,7 @@ export function ShareButton({ token }: { token: string }) {
       className="flex items-center gap-1.5 text-sm font-medium bg-neutral-900 text-white px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors"
     >
       {copied ? <Check size={13} /> : <Link2 size={13} />}
-      {copied ? "Copied!" : "Share Portal Link"}
+      {copied ? "Copied!" : "Copy partner link"}
     </button>
   )
 }

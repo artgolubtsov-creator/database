@@ -4,12 +4,13 @@ import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
-import { useDemoRole, canUpload, canAccessOffers, canAccessBrands } from "@/lib/demo-role-context"
-import { BRANDS, getBrand } from "@/lib/brands"
+import { useDemoRole, canAccessOffers, canAccessBrands } from "@/lib/demo-role-context"
+import { ROLE_LABELS } from "@/lib/roles"
+import { BRANDS } from "@/lib/brands"
 import {
   LayoutDashboard, Tag, Wand2, Settings, LogOut,
   ChevronDown, ChevronRight, LayoutGrid, Images,
-  FolderOpen, BookOpen, Upload
+  FolderOpen, BookOpen
 } from "lucide-react"
 
 interface AppSidebarProps {
@@ -34,7 +35,7 @@ export function AppSidebar({ userName, userRole }: AppSidebarProps) {
   const showBrands = canAccessBrands(demoRole)
 
   const topLinks = [
-    { href: "/dashboard", label: "Database", icon: LayoutDashboard, always: true },
+    { href: "/dashboard", label: "Titles", icon: LayoutDashboard, always: true },
     { href: "/offers", label: "Offers", icon: Tag, always: false, show: showOffers },
     { href: "/crm-maker", label: "CRM Maker", icon: Wand2, always: false, show: showOffers },
   ].filter((l) => l.always || l.show)
@@ -69,6 +70,7 @@ export function AppSidebar({ userName, userRole }: AppSidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
+        <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Content</p>
         {topLinks.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
@@ -85,7 +87,12 @@ export function AppSidebar({ userName, userRole }: AppSidebarProps) {
           </Link>
         ))}
 
-        {showBrands && <div className="h-px bg-neutral-100 my-2" />}
+        {showBrands && (
+          <>
+            <div className="h-px bg-neutral-100 my-2" />
+            <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Brands</p>
+          </>
+        )}
 
         {/* Brand section */}
         {showBrands && <>
@@ -104,7 +111,7 @@ export function AppSidebar({ userName, userRole }: AppSidebarProps) {
                 : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
             )}
           >
-            Brand
+            All brands
           </Link>
           <button
             onClick={() => setBrandsOpen((o) => !o)}
@@ -165,19 +172,10 @@ export function AppSidebar({ userName, userRole }: AppSidebarProps) {
 
         </>}
 
-        {showBrands && canUpload(demoRole) && activeBrandSlug && (
-          <>
-            <div className="h-px bg-neutral-100 my-2" />
-            <button className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-neutral-900 text-white hover:bg-neutral-800 transition-colors">
-              <Upload size={14} />
-              Upload Asset
-            </button>
-          </>
-        )}
-
         {hasAdminAccess && (
           <>
             <div className="h-px bg-neutral-100 my-2" />
+            <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Admin</p>
             <Link
               href="/admin"
               className={cn(
@@ -198,7 +196,7 @@ export function AppSidebar({ userName, userRole }: AppSidebarProps) {
       <div className="border-t border-neutral-200 px-4 py-3 flex items-center justify-between">
         <div className="min-w-0">
           <p className="text-xs font-medium text-neutral-900 truncate">{userName ?? "User"}</p>
-          <p className="text-[10px] text-neutral-400">{demoRole}</p>
+          <p className="text-[10px] text-neutral-400">{ROLE_LABELS[userRole ?? ""] ?? userRole ?? demoRole}</p>
         </div>
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
